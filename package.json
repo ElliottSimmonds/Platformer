@@ -1,0 +1,29 @@
+{
+  "name": "platformer",
+  "version": "1.0.0",
+  "description": "Simple platformer using the phaser engine",
+  "main": "src/index.js",
+  "dependencies": {
+    "phaser": "^3.55.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.17.8",
+    "@babel/preset-env": "^7.16.11",
+    "babel-loader": "^8.2.4",
+    "clean-webpack-plugin": "^4.0.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "raw-loader": "^4.0.2",
+    "webpack": "^5.71.0",
+    "webpack-cli": "^4.9.2",
+    "webpack-dev-server": "^4.7.4",
+    "webpack-merge": "^5.8.0"
+  },
+  "scripts": {
+    "build": "webpack --config webpack/prod.js",
+    "start": "webpack-dev-server --config webpack/base.js --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Elliott Simmonds",
+  "license": "MIT"
+}
