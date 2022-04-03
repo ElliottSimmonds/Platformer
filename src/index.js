@@ -5,13 +5,11 @@ import logoImg from './assets/logo.png';
 import bgImg from './assets/sky.png';
 import platformImg from './assets/platform.png';
 
+import Player from './objects/player.js';
+
 class MyGame extends Phaser.Scene {
 
     platforms;
-    player;
-    cursors;
-    jumpButton;
-    jumpTimer = 0;
 
     constructor() {
         super();
@@ -35,31 +33,26 @@ class MyGame extends Phaser.Scene {
         this.platforms.create(50, 250, 'platform');
         this.platforms.create(750, 220, 'platform');
 
-        //player
-        this.player = this.physics.add.sprite(100, 450, 'chad');
-        this.player.setCollideWorldBounds(true);
+        this.keys = {
+            jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+            right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
+        };
+
+        //create the player
+        this.player = new Player({
+            scene: this,
+            x: 0,
+            y: 0,
+            key: 'chad'
+        })
 
         this.physics.add.collider(this.player, this.platforms);
-
-        this.cursors = this.input.keyboard.createCursorKeys();
-        this.jumpButton = this.input.keyboard.addKey(Phaser.Input.SPACE);
     }
 
     update() {
-        if (this.cursors.left.isDown) {
-            this.player.setVelocityX(-160);
-        }
-        else if (this.cursors.right.isDown) {
-            this.player.setVelocityX(160);
-        }
-        else{
-            this.player.setVelocityX(0);
-        }
-
-        if (this.cursors.up.isDown && this.player.body.onFloor() && this.time.now > this.jumpTimer) {
-            this.player.setVelocityY(-350);
-            this.jumpTimer = this.time.now + 750;
-        }
+        this.player.update(this.keys, this.time);
     }
 }
 
