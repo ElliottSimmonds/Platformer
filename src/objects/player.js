@@ -5,7 +5,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         config.scene.add.existing(this);
         this.body.maxVelocity.x = 200;
         this.body.maxVelocity.y = 500;
-        this.body.setCollideWorldBounds(true);
+        //this.body.setCollideWorldBounds(true);
 
         this.jumpTimer = 0;
     }
@@ -26,6 +26,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
         else {
             this.body.setVelocityX(0);
+        }
+
+        if (this.body.velocity.y < 0) {
+            this.scene.physics.world.collide(this, this.scene.groundLayer, this.scene.tileCollision);
+        } else {
+            this.scene.physics.world.collide(this, this.scene.groundLayer);
         }
 
         if (input.jump && this.body.onFloor() && time.now > this.jumpTimer) {
