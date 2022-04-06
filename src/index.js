@@ -6,6 +6,10 @@ import bgImg from './assets/sky.png';
 import platformImg from './assets/platform.png';
 import groundImg from './assets/ground_1x1.png';
 
+import head from './assets/head.png';
+import body from './assets/body.png';
+import shoe from './assets/shoe.png';
+
 import Player from './objects/player';
 
 import tilemap from './assets/tiled-collision-test.json';
@@ -23,6 +27,10 @@ class MyGame extends Phaser.Scene {
         this.load.image('platform', platformImg);
         //this.load.image('ground_1x1', groundImg);
         this.load.tilemapTiledJSON('map', tilemap);
+
+        this.load.image('head', head);
+        this.load.image('body', body);
+        this.load.image('shoe', shoe);
 
         
         // I load the tiles as a spritesheet so I can use it for both sprites and tiles,
@@ -74,6 +82,7 @@ class MyGame extends Phaser.Scene {
         };
 
         //create the player
+        //add keys for each body part?
         this.player = new Player({
             scene: this,
             x: 60,
@@ -82,7 +91,9 @@ class MyGame extends Phaser.Scene {
         })
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
+        this.cameras.main.zoom = 1.5;
         this.cameras.main.startFollow(this.player);
+
     }
 
     update() {
@@ -107,7 +118,7 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 300 },
-            debug: false
+            debug: true
         }
     }
 };
