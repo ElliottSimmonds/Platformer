@@ -9,7 +9,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         config.scene.add.existing(this);
         this.body.maxVelocity.x = 200;
         this.body.maxVelocity.y = 500;
-        this.body.setCollideWorldBounds(true);
+        //this.body.setCollideWorldBounds(true);
         this.visible = false;
 
         this.jumpTimer = 0;
