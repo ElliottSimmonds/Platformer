@@ -24,11 +24,11 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite {
         this.tile.alpha = 0;
         this.alpha = 1;
 
-        this.x = this.tile.x * 32 + 16;
-        this.y = this.tile.y * 32 + 16;
+        this.x = this.tile.x * tile.width + (tile.width/2);
+        this.y = this.tile.y * tile.height + (tile.height/2);
         this.scene.tweens.add({
             targets: this,
-            y: this.y - 16,
+            y: this.y - (tile.height/2),
             yoyo: true,
             duration: 100,
             onComplete: () => {

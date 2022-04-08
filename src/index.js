@@ -4,15 +4,15 @@ import Phaser from 'phaser';
 import logoImg from './assets/logo.png';
 import bgImg from './assets/sky.png';
 import platformImg from './assets/platform.png';
-import groundImg from './assets/ground_1x1.png';
 
 import head from './assets/head.png';
 import body from './assets/body.png';
 import shoe from './assets/shoe.png';
 
-import Player from './objects/player';
+import tilemap from './assets/test_tilemap.json';
+import tilemapImg from './assets/tile1.png';
 
-import tilemap from './assets/tiled-collision-test.json';
+import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
 
 class MyGame extends Phaser.Scene {
@@ -34,19 +34,17 @@ class MyGame extends Phaser.Scene {
 
         // I load the tiles as a spritesheet so I can use it for both sprites and tiles,
         // Normally you should load it as an image.
-        this.load.spritesheet('tiles', groundImg, {
-            frameWidth: 32,
-            frameHeight: 32,
+        this.load.spritesheet('tiles', tilemapImg, {
+            frameWidth: 64,
+            frameHeight: 64,
             spacing: 0
         });
     }
       
     create() {
         this.map = this.make.tilemap({ key: 'map' });
-        this.groundTiles = this.map.addTilesetImage('ground_1x1', 'tiles');
-    
-        this.map.createLayer('Background Layer', this.groundTiles, 0, 0);
-        this.groundLayer = this.map.createLayer('Ground Layer', this.groundTiles, 0, 0);
+        this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
+        this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
 
         // Used when hitting a tile from below that should bounce up.
@@ -73,8 +71,8 @@ class MyGame extends Phaser.Scene {
         //add keys for each body part?
         this.player = new Player({
             scene: this,
-            x: 60,
-            y: 60,
+            x: 300,
+            y: 200,
             key: 'chad'
         })
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -90,8 +88,8 @@ class MyGame extends Phaser.Scene {
 const config = {
     type: Phaser.AUTO,
     parent: 'phaser-game',
-    width: 800,
-    height: 576,
+    width: 1920,
+    height: 1280,
     scene: MyGame,
     physics: {
         default: 'arcade',
