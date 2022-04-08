@@ -4,19 +4,25 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite {
         config.scene.add.existing(this);
         this.tile = null;
         this.scene = config.scene;
-        //this.play('tileBump');
         this.alpha = 0;
         config.scene.physics.world.enable(this);
         this.body.allowGravity = false;
     }
 
     bump(tile) {
-        let anim = 'tileBump';
+        this.anims.create({
+            key: 'tileBump',
+            frames: this.anims.generateFrameNumbers('tiles', {
+                start: tile.index-1,
+                end: tile.index-1,
+                first: tile.index-1
+            })
+        });
+        this.play('tileBump');
+
         this.tile = tile;
         this.tile.alpha = 0;
         this.alpha = 1;
-
-        this.play(anim);
 
         this.x = this.tile.x * 32 + 16;
         this.y = this.tile.y * 32 + 16;

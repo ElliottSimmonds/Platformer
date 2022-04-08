@@ -32,7 +32,6 @@ class MyGame extends Phaser.Scene {
         this.load.image('body', body);
         this.load.image('shoe', shoe);
 
-        
         // I load the tiles as a spritesheet so I can use it for both sprites and tiles,
         // Normally you should load it as an image.
         this.load.spritesheet('tiles', groundImg, {
@@ -48,22 +47,11 @@ class MyGame extends Phaser.Scene {
     
         this.map.createLayer('Background Layer', this.groundTiles, 0, 0);
         this.groundLayer = this.map.createLayer('Ground Layer', this.groundTiles, 0, 0);
-
         this.groundLayer.setCollisionBetween(1, 25);
 
         // Used when hitting a tile from below that should bounce up.
         this.bounceTile = new AnimatedTile({
             scene: this
-        });
-
-        //animation??? do this better
-        this.anims.create({
-            key: 'tileBump',
-            frames: this.anims.generateFrameNumbers('tiles', {
-                start: 0,
-                end: 0,
-                first: 0
-            })
         });
     
         // This will set Tile ID 26 (the coin tile) to call the function "hitCoin" when collided with
@@ -89,22 +77,13 @@ class MyGame extends Phaser.Scene {
             y: 60,
             key: 'chad'
         })
-
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         this.cameras.main.zoom = 1.5;
         this.cameras.main.startFollow(this.player);
-
     }
 
     update() {
-        this.player.update(this.keys, this.time, this.groundLayer);
-    }
-
-    tileCollision(sprite, tile) {
-        // Bounce it a bit
-        if (sprite.body.onCeiling()) { // only play on collision with bottom of block
-            sprite.scene.bounceTile.bump(tile);
-        }
+        this.player.update(this.keys, this.time);
     }
 }
 
