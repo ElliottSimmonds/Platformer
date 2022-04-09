@@ -5,9 +5,8 @@ import logoImg from './assets/logo.png';
 import bgImg from './assets/sky.png';
 import platformImg from './assets/platform.png';
 
-import head from './assets/head.png';
-import body from './assets/body.png';
-import shoe from './assets/shoe.png';
+import head from './assets/head1.png';
+import body from './assets/body1.png';
 
 import tilemap from './assets/test_tilemap.json';
 import tilemapImg from './assets/tile1.png';
@@ -30,7 +29,6 @@ class MyGame extends Phaser.Scene {
 
         this.load.image('head', head);
         this.load.image('body', body);
-        this.load.image('shoe', shoe);
 
         // I load the tiles as a spritesheet so I can use it for both sprites and tiles,
         // Normally you should load it as an image.
@@ -42,6 +40,7 @@ class MyGame extends Phaser.Scene {
     }
       
     create() {
+        this.bg = this.add.image(this.cameras.main.width / 2, this.cameras.main.height / 2, 'bg');
         this.map = this.make.tilemap({ key: 'map' });
         this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
@@ -51,14 +50,6 @@ class MyGame extends Phaser.Scene {
         this.bounceTile = new AnimatedTile({
             scene: this
         });
-    
-        // This will set Tile ID 26 (the coin tile) to call the function "hitCoin" when collided with
-        //coinLayer.setTileIndexCallback(26, hitCoin, this);
-        
-        // This will set the map location (2, 0) to call the function "hitSecretDoor" Un-comment this to
-        // be jump through the ceiling above where the player spawns. You can use this to create a
-        // secret area.
-        //groundLayer.setTileLocationCallback(2, 0, 1, 1, hitSecretDoor, this);
 
         this.keys = {
             jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
@@ -76,8 +67,12 @@ class MyGame extends Phaser.Scene {
             key: 'chad'
         })
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
-        this.cameras.main.zoom = 1.5;
+        //this.cameras.main.zoom = 1.5;
         this.cameras.main.startFollow(this.player);
+        let scaleX = this.cameras.main.width / this.bg.width;
+        let scaleY = this.cameras.main.height / this.bg.height;
+        let scale = Math.max(scaleX, scaleY);
+        this.bg.setScale(scale).setScrollFactor(0);
     }
 
     update() {
@@ -94,7 +89,7 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 300 },
+            gravity: { y: 400 },
             debug: true
         }
     }

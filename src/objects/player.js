@@ -1,40 +1,24 @@
+import PlayerBody from './playerBody';
+
 export default class Player extends Phaser.GameObjects.Sprite {
     constructor(config) {
         super(config.scene, config.x, config.y, '');
 
         this.scene = config.scene;
-        this.displayWidth = 30;
-        this.displayHeight = 60;
+        this.displayWidth = 55;
+        this.displayHeight = 100;
         config.scene.physics.world.enable(this);
         config.scene.add.existing(this);
-        this.body.maxVelocity.x = 200;
-        this.body.maxVelocity.y = 500;
+        this.body.maxVelocity.x = 800;
+        this.body.maxVelocity.y = 800;
         //this.body.setCollideWorldBounds(true);
         this.visible = false;
 
         this.jumpTimer = 0;
+        this.isJumping = false;
 
-        this.h = config.scene.add.image(15,5,'head');
-        this.b = config.scene.add.image(15,30,'body');
-        this.s = config.scene.add.image(10,55,'shoe');
-        this.s2 = config.scene.add.image(20,55,'shoe');
-        //this.load.image('body', body);
-        //this.load.image('shoe', shoe);
-
-        this.playerContainer = config.scene.add.container(config.x, config.y);
-        this.playerContainer.add(this.b);
-        this.playerContainer.add(this.h);
-        this.playerContainer.add(this.s);
-        this.playerContainer.add(this.s2);
-        config.scene.add.existing(this.playerContainer);
-
-        this.bobhead = config.scene.tweens.add({
-            targets: this.h,
-            y: this.h.y + 5,
-            yoyo: true,
-            duration: 200,
-            repeat: -1,
-            paused: true,
+        this.playerBody = new PlayerBody({
+            scene: this.scene,
         });
     }
 
@@ -46,47 +30,43 @@ export default class Player extends Phaser.GameObjects.Sprite {
             jump: keys.jump.isDown,
         };
 
-        let flipGap = 0; //X pixel offset on sprite flip
         if (input.left) {
-            this.body.setVelocityX(-160);
-            this.playerContainer.scaleX = -1;
-            flipGap = 30;
-            this.startTween();
+            this.body.setVelocityX(-250);
+            this.playerBody.left();
         } else if (input.right) {
-            this.body.setVelocityX(160);
-            this.playerContainer.scaleX = 1;
-            this.startTween();
+            this.body.setVelocityX(250);
+            this.playerBody.right();
         } else {
             this.body.setVelocityX(0);
-            this.stopTween();
-
-            if (this.playerContainer.scaleX === -1) {
-                flipGap = 30;
-            }
+            this.playerBody.stop();
         }
 
-        if (input.down) {
-            this.body.setVelocityY(this.body.velocity.y + 50);
-        } 
+        //if (input.down) {
+            //this.body.setVelocityY(this.body.velocity.y + 50);
+        //} 
+
+        //collision code -- needs fixing when jumping alongside walls!
 
         this.tileArray = [];
-
         this.scene.physics.world.overlap(
             this,
             this.scene.groundLayer,
             function (player, tile) {
                 if (player.body.velocity.y < 0 && tile.index != -1) {
                     let tileX = tile.pixelX+(tile.width/2);
-                    let tileY = tile.pixelY+tile.baseHeight;
+                    let tileY = tile.pixelY+(tile.baseHeight);
 
-                    if ((Math.ceil(Math.sqrt(Math.pow((tileX - player.body.center.x),2) + Math.pow((tileY-player.body.y),2))) <= (tile.width/2)+player.body.halfWidth) && player.body.velocity.y < 0) {
+                    if ((Math.sqrt(Math.pow((tileX - player.body.center.x),2) + Math.pow((tileY-player.body.position.y),2)) <= (tile.width/2)+player.body.halfWidth) && player.body.velocity.y < 0) {
+                        //console.log(Phaser.Math.Within(player.body.center.x, tileX, (tile.width/2)+player.body.halfWidth-2));
                         player.tileArray.push(tile);
                     }
                 }
             }
         );
 
-        if (this.tileArray.length > 0) { // if multiple tiles are collided with, activate function for closest one
+        this.scene.physics.world.collide(this, this.scene.groundLayer);
+
+        if (this.tileArray.length > 0 && this.body.blocked.up) { // if multiple tiles are collided with, activate function for closest one
             let triggerTile;
             this.tileArray.forEach((tile) => {
                 let tileX = tile.pixelX+(tile.width/2);
@@ -104,34 +84,33 @@ export default class Player extends Phaser.GameObjects.Sprite {
             }
         }
 
-        this.scene.physics.world.collide(this, this.scene.groundLayer);
+        //console.log(this.body.blocked.up);
+
+        //jump code
+        if (this.body.onFloor()) {
+            this.isJumping = false;
+        }
+        if (this.isJumping && this.body.velocity.y > 0) {
+            this.scene.physics.world.gravity.y = 600;
+        } else {
+            this.scene.physics.world.gravity.y = 400;
+        }
+        //console.log(this.scene.physics.world.gravity);
 
         if (input.jump && this.body.onFloor() && time.now > this.jumpTimer) {
             this.jump(time);
         }
 
-        this.playerContainer.x = this.body.position.x + flipGap;
-        this.playerContainer.y = this.body.position.y;
+        this.playerBody.update(this.body);
     }
 
     jump(time) {
-        this.body.setVelocityY(-350);
-        this.jumpTimer = time.now + 750;
+        this.isJumping = true;
+        this.body.setVelocityY(-500);
+        this.jumpTimer = time.now + 200;
     }
 
     die() {
         
-    }
-
-    startTween() { 
-        if (!this.bobhead.isPlaying()) {
-            this.bobhead.resume();
-        }
-    }
-    stopTween() { 
-        if (this.bobhead.isPlaying()) {
-            this.bobhead.restart();
-            this.bobhead.pause();
-        }
     }
 }
