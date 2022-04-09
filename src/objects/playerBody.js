@@ -19,6 +19,20 @@ export default class PlayerBody {
             repeat: -1,
             paused: true,
         });
+
+        this.tiltplayer = config.scene.tweens.add({
+            targets: this.b, //your image that must spin
+            rotation: 0.5, //rotation value must be radian
+            duration: 50, //duration is in milliseconds
+            paused: true,
+        });
+
+        this.idleplayer = config.scene.tweens.add({
+            targets: this.b, //your image that must spin
+            rotation: 0, //rotation value must be radian
+            duration: 50, //duration is in milliseconds
+            paused: true,
+        });
     }
 
     update(playerBody) {
@@ -30,16 +44,19 @@ export default class PlayerBody {
         this.spriteContainer.scaleX = -1;
         this.offset = this.h.width;
         this.startTween();
+        this.startWalk();
     }
 
     right() {
         this.spriteContainer.scaleX = 1;
         this.offset = 0;
         this.startTween();
+        this.startWalk();
     }
 
     stop() {
         this.stopTween();
+        this.stopWalk();
     }
 
     startTween() { 
@@ -51,6 +68,24 @@ export default class PlayerBody {
         if (this.bobhead.isPlaying()) {
             this.bobhead.restart();
             this.bobhead.pause();
+        }
+    }
+
+
+    startWalk() {
+        if (!this.tiltplayer.hasStarted) {
+            this.tiltplayer.resume();
+        }
+    }
+
+    stopWalk() {
+        if (this.tiltplayer.hasStarted) {
+            this.tiltplayer.stop();
+            this.bobhead.pause();
+            this.tiltplayer.isRunning=false;
+            if (!this.idleplayer.hasStarted) {
+                this.idleplayer.resume();
+            }
         }
     }
 };
