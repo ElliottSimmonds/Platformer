@@ -68,7 +68,7 @@ class MyGame extends Phaser.Scene {
         })
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         //this.cameras.main.zoom = 1.5;
-        this.cameras.main.startFollow(this.player);
+        this.cameras.main.startFollow(this.player, true, 0.1);
         let scaleX = this.cameras.main.width / this.bg.width;
         let scaleY = this.cameras.main.height / this.bg.height;
         let scale = Math.max(scaleX, scaleY);
@@ -89,8 +89,8 @@ const config = {
     physics: {
         default: 'arcade',
         arcade: {
-            gravity: { y: 400 },
-            debug: true
+            gravity: { y: 900 },
+            debug: false
         }
     }
 };

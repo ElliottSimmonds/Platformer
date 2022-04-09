@@ -10,7 +10,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         config.scene.physics.world.enable(this);
         config.scene.add.existing(this);
         this.body.maxVelocity.x = 800;
-        this.body.maxVelocity.y = 800;
+        this.body.maxVelocity.y = 900;
         //this.body.setCollideWorldBounds(true);
         this.visible = false;
 
@@ -31,10 +31,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
         };
 
         if (input.left) {
-            this.body.setVelocityX(-250);
+            this.body.setVelocityX(-300);
             this.playerBody.left();
         } else if (input.right) {
-            this.body.setVelocityX(250);
+            this.body.setVelocityX(300);
             this.playerBody.right();
         } else {
             this.body.setVelocityX(0);
@@ -90,23 +90,32 @@ export default class Player extends Phaser.GameObjects.Sprite {
         if (this.body.onFloor()) {
             this.isJumping = false;
         }
-        if (this.isJumping && this.body.velocity.y > 0) {
-            this.scene.physics.world.gravity.y = 600;
-        } else {
-            this.scene.physics.world.gravity.y = 400;
-        }
         //console.log(this.scene.physics.world.gravity);
 
         if (input.jump && this.body.onFloor() && time.now > this.jumpTimer) {
             this.jump(time);
         }
+        if (!input.jump && this.isJumping && this.body.velocity.y < -250) { //player is rising
+            this.body.setVelocityY(-250);
+        }
+        
+        let yAccel = 0
+        if (this.isJumping && this.body.velocity.y >= 50 && !input.jump) {
+            yAccel = 500;
+        }
+        if (this.body.velocity.y >= 0 && input.down) {
+            yAccel = 3000;
+        }
+        this.body.acceleration.y = yAccel;
 
         this.playerBody.update(this.body);
+        //console.log(this.body.acceleration.y, this.body.velocity.y);
+        
     }
 
     jump(time) {
         this.isJumping = true;
-        this.body.setVelocityY(-500);
+        this.body.setVelocityY(-650);
         this.jumpTimer = time.now + 200;
     }
 
