@@ -80,7 +80,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
                 }
             });
             if (triggerTile) {
-                this.scene.bounceTile.bump(triggerTile);
+                this.scene.activateTile(triggerTile);
             }
         }
 

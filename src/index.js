@@ -8,7 +8,7 @@ import platformImg from './assets/platform.png';
 import head from './assets/head1.png';
 import body from './assets/body1.png';
 
-import tilemap from './assets/test_tilemap.json';
+import tilemap from './assets/test_tilemap-new.json';
 import tilemapImg from './assets/tile1.png';
 
 import Player from './objects/player';
@@ -77,6 +77,15 @@ class MyGame extends Phaser.Scene {
 
     update() {
         this.player.update(this.keys, this.time);
+    }
+
+    activateTile(tile) {
+        if (tile.properties.breakable) {
+            console.log("destroy me!");
+            this.bounceTile.break(tile);
+        } else {
+            this.bounceTile.bump(tile);
+        }
     }
 }
 

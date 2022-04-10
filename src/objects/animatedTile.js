@@ -1,4 +1,4 @@
-export default class AnimatedTile extends Phaser.GameObjects.Sprite {
+export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change name to something more appropriate like tile trigger
     constructor(config) {
         super(config.scene, -100, 0, 'tiles');
         config.scene.add.existing(this);
@@ -10,6 +10,7 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite {
     }
 
     bump(tile) {
+        this.anims.remove('tileBump');
         this.anims.create({
             key: 'tileBump',
             frames: this.anims.generateFrameNumbers('tiles', {
@@ -37,5 +38,11 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite {
                 this.alpha = 0;
             }
         });
+    }
+
+    break(tile) {
+        //create particles
+        //destroy block
+        this.scene.map.removeTile(tile);
     }
 }
