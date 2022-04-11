@@ -16,6 +16,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
         this.jumpTimer = 0;
         this.isJumping = false;
+        this.crouching = false;
 
         this.playerBody = new PlayerBody({
             scene: this.scene,
@@ -108,15 +109,46 @@ export default class Player extends Phaser.GameObjects.Sprite {
         }
         this.body.acceleration.y = yAccel;
 
+        if (this.body.onFloor() && !this.isJumping && input.down) { //crouch
+            if (!this.crouching) {
+                this.crouch();
+            }
+        }
+        if (!input.down && this.crouching) { //uncrouch
+            this.uncrouch();
+        }
+
         this.playerBody.update(this.body);
         //console.log(this.body.acceleration.y, this.body.velocity.y);
-        
     }
 
     jump(time) {
         this.isJumping = true;
         this.body.setVelocityY(-650);
         this.jumpTimer = time.now + 200;
+    }
+
+    crouch() { //reduce player size and lower walk speed
+        this.displayHeight = 60;
+        this.body.y = this.body.y + 20;
+        this.crouching = true;
+    }
+
+    uncrouch() {
+        console.log(this.body.x, this.body.y)
+        let foundTiles = [];
+        let preventUncrouch = false; //prevent crouch if tiles block player
+        foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y-40,55,40);
+        foundTiles.forEach((tile) => {
+            if (tile.index != -1) { // change to tile collision property which we will add later
+                preventUncrouch = true;
+            }
+        })
+        if (!preventUncrouch) {
+            this.displayHeight = 100;
+            this.body.y = this.body.y - 20;
+            this.crouching = false;
+        }
     }
 
     die() {
