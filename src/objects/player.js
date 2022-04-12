@@ -32,10 +32,18 @@ export default class Player extends Phaser.GameObjects.Sprite {
         };
 
         if (input.left) {
-            this.body.setVelocityX(-300);
+            if (this.crouching) {
+                this.body.setVelocityX(-200);
+            } else {
+                this.body.setVelocityX(-300);
+            }
             this.playerBody.left();
         } else if (input.right) {
-            this.body.setVelocityX(300);
+            if (this.crouching) {
+                this.body.setVelocityX(200);
+            } else {
+                this.body.setVelocityX(300);
+            }
             this.playerBody.right();
         } else {
             this.body.setVelocityX(0);
@@ -46,8 +54,9 @@ export default class Player extends Phaser.GameObjects.Sprite {
             //this.body.setVelocityY(this.body.velocity.y + 50);
         //} 
 
-        //collision code -- needs fixing when jumping alongside walls!
-
+        // ####################
+        // ## collision code ##
+        // ####################
         this.tileArray = [];
         this.scene.physics.world.overlap(
             this,
@@ -85,46 +94,48 @@ export default class Player extends Phaser.GameObjects.Sprite {
             }
         }
 
-        //console.log(this.body.blocked.up);
-
-        //jump code
-        if (this.body.onFloor()) {
+        // #################
+        // ##  jump code  ##
+        // #################
+        if (this.body.onFloor()) { // disable jumping when landing
             this.isJumping = false;
         }
-        //console.log(this.scene.physics.world.gravity);
 
-        if (input.jump && this.body.onFloor() && time.now > this.jumpTimer) {
+        if (input.jump && this.body.onFloor() && time.now > this.jumpTimer) { // jump when on floor and timer has passed
             this.jump(time);
         }
-        if (!input.jump && this.isJumping && this.body.velocity.y < -250) { //player is rising
+        if (!input.jump && this.isJumping && this.body.velocity.y < -250) { // cut jump height when input released by changing velocity
             this.body.setVelocityY(-250);
         }
         
         let yAccel = 0
-        if (this.isJumping && this.body.velocity.y >= 50 && !input.jump) {
+        if (this.isJumping && this.body.velocity.y >= 50 && !input.jump) { // increased downward acceleration
             yAccel = 500;
         }
-        if (this.body.velocity.y >= 0 && input.down) {
+        if (this.body.velocity.y >= 0 && input.down) { // further increased downward acceleration when down is pressed
             yAccel = 3000;
         }
         this.body.acceleration.y = yAccel;
 
-        if (this.body.onFloor() && !this.isJumping && input.down) { //crouch
+        if (this.body.onFloor() && !this.isJumping && input.down) { // crouch
             if (!this.crouching) {
                 this.crouch();
             }
         }
-        if (!input.down && this.crouching) { //uncrouch
+        if (!input.down && this.crouching) { // uncrouch
             this.uncrouch();
         }
 
         this.playerBody.update(this.body);
-        //console.log(this.body.acceleration.y, this.body.velocity.y);
     }
 
     jump(time) {
         this.isJumping = true;
-        this.body.setVelocityY(-650);
+        if (this.crouching) {
+            this.body.setVelocityY(-500);
+        } else {
+            this.body.setVelocityY(-650);
+        }
         this.jumpTimer = time.now + 200;
     }
 
@@ -135,12 +146,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
 
     uncrouch() {
-        console.log(this.body.x, this.body.y)
         let foundTiles = [];
         let preventUncrouch = false; //prevent crouch if tiles block player
         foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y-40,55,40);
         foundTiles.forEach((tile) => {
-            if (tile.index != -1) { // change to tile collision property which we will add later
+            if (tile.index != -1 && tile.collideDown) { // change to tile collision property which we will add later
                 preventUncrouch = true;
             }
         })

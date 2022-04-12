@@ -45,6 +45,13 @@ class MyGame extends Phaser.Scene {
         this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
+        
+        this.groundLayer.forEachTile(tile => {
+            if (tile.properties.Up) {tile.collideUp = tile.properties.Up.Collide};
+            if (tile.properties.Down) {tile.collideDown = tile.properties.Down.Collide};
+            if (tile.properties.Left) {tile.collideLeft = tile.properties.Left.Collide};
+            if (tile.properties.Right) {tile.collideRight = tile.properties.Right.Collide};
+        })
 
         // Used when hitting a tile from below that should bounce up.
         this.bounceTile = new AnimatedTile({
@@ -81,7 +88,6 @@ class MyGame extends Phaser.Scene {
 
     activateTile(tile) {
         if (tile.properties.breakable) {
-            console.log("destroy me!");
             this.bounceTile.break(tile);
         } else {
             this.bounceTile.bump(tile);
@@ -99,7 +105,7 @@ const config = {
         default: 'arcade',
         arcade: {
             gravity: { y: 900 },
-            debug: false
+            debug: true
         }
     }
 };
