@@ -50,49 +50,50 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.playerBody.stop();
         }
 
-        //if (input.down) {
-            //this.body.setVelocityY(this.body.velocity.y + 50);
-        //} 
-
         // ####################
         // ## collision code ##
         // ####################
-        this.tileArray = [];
-        this.scene.physics.world.overlap(
-            this,
-            this.scene.groundLayer,
-            function (player, tile) {
-                if (player.body.velocity.y < 0 && tile.index != -1) {
-                    let tileX = tile.pixelX+(tile.width/2);
-                    let tileY = tile.pixelY+(tile.baseHeight);
-
-                    if ((Math.sqrt(Math.pow((tileX - player.body.center.x),2) + Math.pow((tileY-player.body.position.y),2)) <= (tile.width/2)+player.body.halfWidth) && player.body.velocity.y < 0) {
-                        //console.log(Phaser.Math.Within(player.body.center.x, tileX, (tile.width/2)+player.body.halfWidth-2));
-                        player.tileArray.push(tile);
-                    }
-                }
-            }
-        );
-
         this.scene.physics.world.collide(this, this.scene.groundLayer);
-
-        if (this.tileArray.length > 0 && this.body.blocked.up) { // if multiple tiles are collided with, activate function for closest one
+        
+        let collisionDict = {};
+        // run getTilesWithinWorldXY for an area on each side of the player to get collision tiles when blocked in a certain direction
+        if (this.body.blocked.up) {
+            collisionDict.up = this.scene.map.getTilesWithinWorldXY(this.body.x, this.body.y-5, this.body.width, 5);
+        }
+        if (this.body.blocked.down) {
+            collisionDict.down = this.scene.map.getTilesWithinWorldXY(this.body.x, this.body.y+this.body.height, this.body.width, 5);
+        }
+        if (this.body.blocked.left) {
+            collisionDict.left = this.scene.map.getTilesWithinWorldXY(this.body.x-5, this.body.y, 5, this.body.height);
+        }
+        if (this.body.blocked.right) {
+            collisionDict.right = this.scene.map.getTilesWithinWorldXY(this.body.x+this.body.width, this.body.y, 5, this.body.height);
+        }
+        Object.keys(collisionDict).forEach(key => {
             let triggerTile;
-            this.tileArray.forEach((tile) => {
-                let tileX = tile.pixelX+(tile.width/2);
-                if (triggerTile) {
-                    let triggerTileX = triggerTile.pixelX+(triggerTile.width/2);
-                    if (Math.abs(tileX-this.body.center.x) < Math.abs(triggerTileX-this.body.center.x)) {
+            collisionDict[key].forEach((tile) => {
+                // check tile has collide enabled for key direction
+                if (tile.index != -1 && (
+                    (key === 'up' && tile.collideDown) ||
+                    (key === 'down' && tile.collideUp) ||
+                    (key === 'left' && tile.collideRight) ||
+                    (key === 'right' && tile.collideLeft)
+                )) {
+                    if (triggerTile) {
+                        let triggerDistance = Phaser.Math.Distance.Between(triggerTile.getCenterX(), triggerTile.getCenterY(), this.body.center.x, this.body.center.y);
+                        let tileDistance = Phaser.Math.Distance.Between(tile.getCenterX(), tile.getCenterY(), this.body.center.x, this.body.center.y);
+                        if (tileDistance < triggerDistance) {
+                            triggerTile = tile;
+                        }
+                    } else {
                         triggerTile = tile;
                     }
-                } else {
-                    triggerTile = tile;
                 }
             });
             if (triggerTile) {
-                this.scene.activateTile(triggerTile);
+                this.scene.activateTile(triggerTile, key);
             }
-        }
+        });
 
         // #################
         // ##  jump code  ##

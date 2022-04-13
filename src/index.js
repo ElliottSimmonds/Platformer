@@ -8,7 +8,7 @@ import platformImg from './assets/platform.png';
 import head from './assets/head1.png';
 import body from './assets/body1.png';
 
-import tilemap from './assets/test_tilemap-new.json';
+import tilemap from './assets/test_tilemap.json';
 import tilemapImg from './assets/tile1.png';
 
 import Player from './objects/player';
@@ -47,10 +47,26 @@ class MyGame extends Phaser.Scene {
         this.groundLayer.setCollisionBetween(1, 25);
         
         this.groundLayer.forEachTile(tile => {
-            if (tile.properties.Up) {tile.collideUp = tile.properties.Up.Collide};
-            if (tile.properties.Down) {tile.collideDown = tile.properties.Down.Collide};
-            if (tile.properties.Left) {tile.collideLeft = tile.properties.Left.Collide};
-            if (tile.properties.Right) {tile.collideRight = tile.properties.Right.Collide};
+            if (tile.properties.up) { // have to write it this way because tiled is retarded and doesnt save default properties to map file
+                if (tile.properties.up.collide === false) {
+                    tile.collideUp = false;
+                }
+            };
+            if (tile.properties.down) {
+                if (tile.properties.down.collide === false) {
+                    tile.collideDown = false;
+                }
+            };
+            if (tile.properties.left) {
+                if (tile.properties.left.collide === false) {
+                    tile.collideLeft = false;
+                }
+            };
+            if (tile.properties.right) {
+                if (tile.properties.right.collide === false) {
+                    tile.collideRight = false;
+                }
+            };
         })
 
         // Used when hitting a tile from below that should bounce up.
@@ -86,10 +102,10 @@ class MyGame extends Phaser.Scene {
         this.player.update(this.keys, this.time);
     }
 
-    activateTile(tile) {
-        if (tile.properties.breakable) {
+    activateTile(tile, direction) { // giga function handling all the collision detection activations. for it to work, tile must have up, down, left and right properties in tiled json.
+        if (tile.properties[direction] && tile.properties[direction].break) {
             this.bounceTile.break(tile);
-        } else {
+        } else if (direction === 'up') {
             this.bounceTile.bump(tile);
         }
     }
