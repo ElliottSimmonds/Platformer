@@ -46,6 +46,15 @@ class MyGame extends Phaser.Scene {
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
         
+        //create the player
+        //add keys for each body part?
+        this.player = new Player({
+            scene: this,
+            x: 300,
+            y: 200,
+            key: 'chad'
+        })
+
         this.groundLayer.forEachTile(tile => {
             if (tile.properties.up) { // have to write it this way because tiled is retarded and doesnt save default properties to map file
                 if (tile.properties.up.collide === false) {
@@ -67,7 +76,15 @@ class MyGame extends Phaser.Scene {
                     tile.collideRight = false;
                 }
             };
-        })
+
+            if (tile.properties.water) {
+                tile.collideUp = false;
+                tile.collideDown = false;
+                tile.collideLeft = false;
+                tile.collideRight = false;
+            }
+        });
+        this.groundLayer.setTileIndexCallback(7, this.inWater, this);
 
         // Used when hitting a tile from below that should bounce up.
         this.bounceTile = new AnimatedTile({
@@ -81,14 +98,6 @@ class MyGame extends Phaser.Scene {
             down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
         };
 
-        //create the player
-        //add keys for each body part?
-        this.player = new Player({
-            scene: this,
-            x: 300,
-            y: 200,
-            key: 'chad'
-        })
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
         //this.cameras.main.zoom = 1.5;
         this.cameras.main.startFollow(this.player, true, 0.1);
@@ -115,6 +124,11 @@ class MyGame extends Phaser.Scene {
                 this.player.onIce = false;
             }
         }
+    }
+
+    inWater(player, tile) {
+        player.inWater = true;
+        player.wasInWater = true;
     }
 }
 
