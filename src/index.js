@@ -108,6 +108,13 @@ class MyGame extends Phaser.Scene {
         } else if (direction === 'up') {
             this.bounceTile.bump(tile);
         }
+        if (direction === 'down') {
+            if (tile.properties[direction] && tile.properties[direction].ice) {
+                this.player.onIce = true;
+            } else {
+                this.player.onIce = false;
+            }
+        }
     }
 }
 

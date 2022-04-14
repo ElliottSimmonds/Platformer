@@ -17,10 +17,14 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.jumpTimer = 0;
         this.isJumping = false;
         this.crouching = false;
+        this.onIce = false;
 
         this.playerBody = new PlayerBody({
             scene: this.scene,
         });
+
+        this.crouchSpeed = 300;
+        this.runSpeed = 400;
     }
 
     update(keys, time) {
@@ -31,24 +35,39 @@ export default class Player extends Phaser.GameObjects.Sprite {
             jump: keys.jump.isDown,
         };
 
+        //
+        // X Axis movement
+        //
+        let currentXVelocity = this.body.velocity.x;
+        let targetXVelocity = 0;
         if (input.left) {
             if (this.crouching) {
-                this.body.setVelocityX(-200);
+                targetXVelocity = -this.crouchSpeed;
             } else {
-                this.body.setVelocityX(-300);
+                targetXVelocity = -this.runSpeed;
             }
             this.playerBody.left();
         } else if (input.right) {
             if (this.crouching) {
-                this.body.setVelocityX(200);
+                targetXVelocity = this.crouchSpeed;
             } else {
-                this.body.setVelocityX(300);
+                targetXVelocity = this.runSpeed;
             }
             this.playerBody.right();
         } else {
-            this.body.setVelocityX(0);
+            targetXVelocity = 0;
             this.playerBody.stop();
         }
+
+        let friction = 0.15;
+        if (this.onIce && !this.isJumping) {
+            friction = 0.02;
+        }
+        let newVelocity = Phaser.Math.Linear(currentXVelocity, targetXVelocity, friction);
+        if ((newVelocity < 1 && newVelocity > 0) || (newVelocity > -1 && newVelocity < 0)) { // rounds new velocity to 0 when it's really small to stop it reaching annoying decimals
+            newVelocity = 0;
+        }
+        this.body.setVelocityX(newVelocity);
 
         // ####################
         // ## collision code ##
@@ -109,7 +128,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.body.setVelocityY(-250);
         }
         
-        let yAccel = 0
+        let yAccel = 0;
         if (this.isJumping && this.body.velocity.y >= 50 && !input.jump) { // increased downward acceleration
             yAccel = 500;
         }
