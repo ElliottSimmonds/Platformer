@@ -83,6 +83,32 @@ class MyGame extends Phaser.Scene {
                 tile.collideLeft = false;
                 tile.collideRight = false;
             }
+
+            // sets faces to interesting for collision detection
+            let adjUp = this.groundLayer.getTileAt(tile.x, tile.y-1);
+            let adjDown = this.groundLayer.getTileAt(tile.x, tile.y+1);
+            let adjLeft = this.groundLayer.getTileAt(tile.x-1, tile.y);
+            let adjRight = this.groundLayer.getTileAt(tile.x+1, tile.y);
+            if (adjUp) {
+                if ((adjUp.properties.down && adjUp.properties.down.collide === false) || adjUp.properties.water) { // if adjacent tile has collision disabled on connected face, set this tile face as interesting
+                    tile.faceTop = true; 
+                };
+            }
+            if (adjDown) {
+                if ((adjDown.properties.up && adjDown.properties.up.collide === false) || adjDown.properties.water) {
+                    tile.faceBottom = true; 
+                };
+            }
+            if (adjLeft) {
+                if ((adjLeft.properties.right && adjLeft.properties.right.collide === false) || adjLeft.properties.water) {
+                    tile.faceLeft = true; 
+                };
+            }
+            if (adjRight) {
+                if ((adjRight.properties.left && adjRight.properties.left.collide === false) || adjRight.properties.water) {
+                    tile.faceRight = true; 
+                };
+            }
         });
         this.groundLayer.setTileIndexCallback(7, this.inWater, this);
 
@@ -105,9 +131,54 @@ class MyGame extends Phaser.Scene {
         let scaleY = this.cameras.main.height / this.bg.height;
         let scale = Math.max(scaleX, scaleY);
         this.bg.setScale(scale).setScrollFactor(0);
+
+        this.physics.add.collider(this.player, this.groundLayer);
     }
 
     update() {
+        // ####################
+        // ## collision code ##
+        // ####################        
+        let collisionDict = {};
+        // run getTilesWithinWorldXY for an area on each side of the player to get collision tiles when blocked in a certain direction
+        if (this.player.body.blocked.up) {
+            collisionDict.up = this.map.getTilesWithinWorldXY(this.player.body.x, this.player.body.y-5, this.player.body.width, 5);
+        }
+        if (this.player.body.blocked.down) {
+            collisionDict.down = this.map.getTilesWithinWorldXY(this.player.body.x, this.player.body.y+this.player.body.height, this.player.body.width, 5);
+        }
+        if (this.player.body.blocked.left) {
+            collisionDict.left = this.map.getTilesWithinWorldXY(this.player.body.x-5, this.player.body.y, 5, this.player.body.height);
+        }
+        if (this.player.body.blocked.right) {
+            collisionDict.right = this.map.getTilesWithinWorldXY(this.player.body.x+this.player.body.width, this.player.body.y, 5, this.player.body.height);
+        }
+        Object.keys(collisionDict).forEach(key => {
+            let triggerTile;
+            collisionDict[key].forEach((tile) => {
+                // check tile has collide enabled for key direction
+                if (tile.index != -1 && (
+                    (key === 'up' && tile.collideDown) ||
+                    (key === 'down' && tile.collideUp) ||
+                    (key === 'left' && tile.collideRight) ||
+                    (key === 'right' && tile.collideLeft)
+                )) {
+                    if (triggerTile) {
+                        let triggerDistance = Phaser.Math.Distance.Between(triggerTile.getCenterX(), triggerTile.getCenterY(), this.player.body.center.x, this.player.body.center.y);
+                        let tileDistance = Phaser.Math.Distance.Between(tile.getCenterX(), tile.getCenterY(), this.player.body.center.x, this.player.body.center.y);
+                        if (tileDistance < triggerDistance) {
+                            triggerTile = tile;
+                        }
+                    } else {
+                        triggerTile = tile;
+                    }
+                }
+            });
+            if (triggerTile) {
+                this.activateTile(triggerTile, key);
+            }
+        });
+
         this.player.update(this.keys, this.time);
     }
 

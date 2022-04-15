@@ -37,51 +37,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
             jump: keys.jump.isDown,
         };
 
-        // #################### // move to world/scene
-        // ## collision code ##
-        // ####################
-        this.scene.physics.world.collide(this, this.scene.groundLayer);
-        
-        let collisionDict = {};
-        // run getTilesWithinWorldXY for an area on each side of the player to get collision tiles when blocked in a certain direction
-        if (this.body.blocked.up) {
-            collisionDict.up = this.scene.map.getTilesWithinWorldXY(this.body.x, this.body.y-5, this.body.width, 5);
-        }
-        if (this.body.blocked.down) {
-            collisionDict.down = this.scene.map.getTilesWithinWorldXY(this.body.x, this.body.y+this.body.height, this.body.width, 5);
-        }
-        if (this.body.blocked.left) {
-            collisionDict.left = this.scene.map.getTilesWithinWorldXY(this.body.x-5, this.body.y, 5, this.body.height);
-        }
-        if (this.body.blocked.right) {
-            collisionDict.right = this.scene.map.getTilesWithinWorldXY(this.body.x+this.body.width, this.body.y, 5, this.body.height);
-        }
-        Object.keys(collisionDict).forEach(key => {
-            let triggerTile;
-            collisionDict[key].forEach((tile) => {
-                // check tile has collide enabled for key direction
-                if (tile.index != -1 && (
-                    (key === 'up' && tile.collideDown) ||
-                    (key === 'down' && tile.collideUp) ||
-                    (key === 'left' && tile.collideRight) ||
-                    (key === 'right' && tile.collideLeft)
-                )) {
-                    if (triggerTile) {
-                        let triggerDistance = Phaser.Math.Distance.Between(triggerTile.getCenterX(), triggerTile.getCenterY(), this.body.center.x, this.body.center.y);
-                        let tileDistance = Phaser.Math.Distance.Between(tile.getCenterX(), tile.getCenterY(), this.body.center.x, this.body.center.y);
-                        if (tileDistance < triggerDistance) {
-                            triggerTile = tile;
-                        }
-                    } else {
-                        triggerTile = tile;
-                    }
-                }
-            });
-            if (triggerTile) {
-                this.scene.activateTile(triggerTile, key);
-            }
-        });
-
         //
         // X Axis movement
         //
