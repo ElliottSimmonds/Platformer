@@ -1,9 +1,7 @@
 import Phaser from 'phaser';
 
 //image paths
-import logoImg from './assets/logo.png';
 import bgImg from './assets/sky.png';
-import platformImg from './assets/platform.png';
 
 import head from './assets/head1.png';
 import body from './assets/body1.png';
@@ -21,10 +19,7 @@ class MyGame extends Phaser.Scene {
     }
 
     preload() {
-        this.load.image('chad', logoImg);
         this.load.image('bg', bgImg);
-        this.load.image('platform', platformImg);
-        //this.load.image('ground_1x1', groundImg);
         this.load.tilemapTiledJSON('map', tilemap);
 
         this.load.image('head', head);
@@ -85,12 +80,13 @@ class MyGame extends Phaser.Scene {
             }
 
             // sets faces to interesting for collision detection
+            // NOTE: no need to do this for tiles with no collision, might be worth adding to condition
             let adjUp = this.groundLayer.getTileAt(tile.x, tile.y-1);
             let adjDown = this.groundLayer.getTileAt(tile.x, tile.y+1);
             let adjLeft = this.groundLayer.getTileAt(tile.x-1, tile.y);
             let adjRight = this.groundLayer.getTileAt(tile.x+1, tile.y);
-            if (adjUp) {
-                if ((adjUp.properties.down && adjUp.properties.down.collide === false) || adjUp.properties.water) { // if adjacent tile has collision disabled on connected face, set this tile face as interesting
+            if (adjUp) { // if adjacent tile has collision disabled on connected face, set tile face as interesting
+                if ((adjUp.properties.down && adjUp.properties.down.collide === false) || adjUp.properties.water) {
                     tile.faceTop = true; 
                 };
             }
@@ -111,6 +107,7 @@ class MyGame extends Phaser.Scene {
             }
         });
         this.groundLayer.setTileIndexCallback(7, this.inWater, this);
+        this.physics.add.collider(this.player, this.groundLayer);
 
         // Used when hitting a tile from below that should bounce up.
         this.bounceTile = new AnimatedTile({
@@ -131,8 +128,6 @@ class MyGame extends Phaser.Scene {
         let scaleY = this.cameras.main.height / this.bg.height;
         let scale = Math.max(scaleX, scaleY);
         this.bg.setScale(scale).setScrollFactor(0);
-
-        this.physics.add.collider(this.player, this.groundLayer);
     }
 
     update() {
