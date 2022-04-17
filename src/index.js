@@ -11,6 +11,7 @@ import tilemapImg from './assets/tile1.png';
 
 import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
+import SpecialTile from './objects/specialTile';
 
 class MyGame extends Phaser.Scene {
 
@@ -21,7 +22,7 @@ class MyGame extends Phaser.Scene {
     preload() {
         this.load.image('bg', bgImg);
         this.load.tilemapTiledJSON('map', tilemap);
-
+        
         this.load.image('head', head);
         this.load.image('body', body);
 
@@ -40,6 +41,8 @@ class MyGame extends Phaser.Scene {
         this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
+
+        this.specialTiles = this.physics.add.group();
         
         //create the player
         //add keys for each body part?
@@ -105,9 +108,41 @@ class MyGame extends Phaser.Scene {
                     tile.faceRight = true; 
                 };
             }
+
+            if (tile.properties.pushable || tile.properties.gravity) {
+                let newSpecialTile = new SpecialTile({
+                    scene: this,
+                    x: tile.pixelX+(tile.width/2),
+                    y: tile.pixelY+(tile.height/2),
+                    key: 'tiles',
+                    frame: tile.index-1,
+                    properties: tile.properties
+                })
+                this.specialTiles.add(newSpecialTile);
+                this.map.removeTile(tile);
+            }
         });
         this.groundLayer.setTileIndexCallback(7, this.inWater, this);
         this.physics.add.collider(this.player, this.groundLayer);
+        this.physics.add.collider(this.player, this.specialTiles);
+        this.physics.add.collider(this.specialTiles, this.groundLayer);
+        this.physics.add.collider(this.specialTiles, this.specialTiles);
+        console.log(this.specialTiles)
+
+        this.specialTiles.getChildren().forEach(tile => {
+            if (tile.properties.pushable) {
+                tile.body.allowDrag = true;
+                tile.body.setAllowDrag(true);
+                tile.body.setDrag(300,300);
+            }
+            if (tile.properties.gravity) {
+                tile.body.allowGravity = true;
+            } else {
+                tile.body.allowGravity = false;
+            }
+            tile.body.maxVelocity.x = 500;
+            tile.body.maxVelocity.y = 500;
+        });
 
         // Used when hitting a tile from below that should bounce up.
         this.bounceTile = new AnimatedTile({
@@ -116,9 +151,11 @@ class MyGame extends Phaser.Scene {
 
         this.keys = {
             jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
+            jump2: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
             left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
             right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
-            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN)
+            down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+            shift: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT)
         };
 
         this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels);
@@ -173,6 +210,10 @@ class MyGame extends Phaser.Scene {
                 this.activateTile(triggerTile, key);
             }
         });
+
+        this.specialTiles.getChildren().forEach(tile => {
+            tile.update();
+        })
 
         this.player.update(this.keys, this.time);
     }
