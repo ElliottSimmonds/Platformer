@@ -32,6 +32,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.crouchSpeed = 300;
         this.runSpeed = 400;
         this.boostSpeed = 800;
+        this.boostDirection = '';
 
         this.safeZone = {x: config.x, y: config.y} // stores last safe x/y coordinates
     }
@@ -52,22 +53,28 @@ export default class Player extends Phaser.GameObjects.Sprite {
         let targetXVelocity = 0;
         if (input.left && !(this.slideDirection === 'right')) {
             if (this.crouching) {
-                targetXVelocity = -this.crouchSpeed;
+                targetXVelocity += -this.crouchSpeed;
             } else {
-                targetXVelocity = -this.runSpeed;
+                targetXVelocity += -this.runSpeed;
             }
             this.playerBody.left();
         } else if (input.right && !(this.slideDirection === 'left')) {
             if (this.crouching) {
-                targetXVelocity = this.crouchSpeed;
+                targetXVelocity += this.crouchSpeed;
             } else {
-                targetXVelocity = this.runSpeed;
+                targetXVelocity += this.runSpeed;
             }
             this.playerBody.right();
         } else {
             targetXVelocity = 0;
             this.playerBody.stop();
         }
+
+        if (this.boostDirection === 'left') {
+            targetXVelocity += -this.boostSpeed;
+        } else if (this.boostDirection === 'right') {
+            targetXVelocity += this.boostSpeed;
+        } 
 
         // slide code
         if (input.shift && !this.sliding && !this.inWater && time.now > this.slideTimer) {
@@ -149,6 +156,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             newXVelocity = 0;
         }
         this.body.setVelocityX(newXVelocity);
+        this.boostDirection = '';
 
         this.playerBody.update(this.body);
     }

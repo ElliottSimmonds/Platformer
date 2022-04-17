@@ -234,6 +234,12 @@ class MyGame extends Phaser.Scene {
             } else {
                 this.player.onIce = false;
             }
+
+            if (tile.properties[direction] && tile.properties[direction].boost) {
+                this.player.boostDirection = tile.properties[direction].boost;
+            } else {
+                this.player.boostDirection = '';
+            }
             
             let safeTile = true;
             if (tile.breakable || (tile.properties[direction] && !tile.properties[direction].kill && !tile.properties[direction].boost && !tile.properties[direction].ice)) {
