@@ -224,11 +224,24 @@ class MyGame extends Phaser.Scene {
         } else if (direction === 'up') {
             this.bounceTile.bump(tile);
         }
+        if (tile.properties[direction] && tile.properties[direction].kill) {
+            this.player.die();
+        }
+
         if (direction === 'down') {
             if (tile.properties[direction] && tile.properties[direction].ice) {
                 this.player.onIce = true;
             } else {
                 this.player.onIce = false;
+            }
+            
+            let safeTile = true;
+            if (tile.breakable || (tile.properties[direction] && !tile.properties[direction].kill && !tile.properties[direction].boost && !tile.properties[direction].ice)) {
+                safeTile = false;
+            }
+            if (safeTile) {
+                this.player.safeZone.x = tile.pixelX+(tile.width/2);
+                this.player.safeZone.y = tile.pixelY-(tile.height);
             }
         }
     }

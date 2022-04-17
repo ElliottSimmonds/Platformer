@@ -32,6 +32,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.crouchSpeed = 300;
         this.runSpeed = 400;
         this.boostSpeed = 800;
+
+        this.safeZone = {x: config.x, y: config.y} // stores last safe x/y coordinates
     }
 
     update(keys, time) {
@@ -216,6 +218,13 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
 
     die() {
-        
+        //reset attributes
+        this.body.velocity.x = 0;
+        this.body.velocity.y = 0;
+
+        //move to safe zone
+        this.x = this.safeZone.x;
+        this.y = this.safeZone.y;
+        console.log("dead!",this);
     }
 }
