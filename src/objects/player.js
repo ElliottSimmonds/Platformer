@@ -15,12 +15,12 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.visible = false;
 
         this.jumpTimer = 0;
-        this.slideTimer = 0;
         this.slideDuration = 0;
+        this.canSlide = false;
         this.jumping = false;
         this.crouching = false;
         this.sliding = false;
-        this.slideDirection = '';
+        this.slideDirection = 'right';
         this.onIce = false;
         this.inWater = false;
         this.wasInWater = false; // track when leaving water to allow jump out
@@ -51,14 +51,14 @@ export default class Player extends Phaser.GameObjects.Sprite {
         //
         let currentXVelocity = this.body.velocity.x;
         let targetXVelocity = 0;
-        if (input.left && !(this.slideDirection === 'right')) {
+        if (input.left || (this.sliding && this.slideDirection === 'left')) {
             if (this.crouching) {
                 targetXVelocity += -this.crouchSpeed;
             } else {
                 targetXVelocity += -this.runSpeed;
             }
             this.playerBody.left();
-        } else if (input.right && !(this.slideDirection === 'left')) {
+        } else if (input.right || (this.sliding && this.slideDirection === 'right')) {
             if (this.crouching) {
                 targetXVelocity += this.crouchSpeed;
             } else {
@@ -77,9 +77,9 @@ export default class Player extends Phaser.GameObjects.Sprite {
         } 
 
         // slide code
-        if (input.shift && !this.sliding && !this.inWater && time.now > this.slideTimer) {
+        if (input.shift && !this.sliding && !this.inWater && this.canSlide) {
             this.slide(time);
-            targetXVelocity > 0 ? this.slideDirection = 'right' : (targetXVelocity < 0 ? this.slideDirection = 'left' : this.slideDirection = '');
+            this.playerBody.spriteContainer.scaleX === -1 ? this.slideDirection = 'left' : this.slideDirection = 'right';
         }
         if ((!input.shift && this.sliding) || (time.now > this.slideDuration && this.sliding)) { // unslide when slide button is released or slide timer expires
             this.unslide();
@@ -90,6 +90,8 @@ export default class Player extends Phaser.GameObjects.Sprite {
         // #################
         if ((this.body.onFloor() || this.body.touching.down)) { // disable jumping when landing
             this.jumping = false;
+            this.canSlide = false;
+            // unslide, make unslide auto crouch when blocked
         }
         if (this.inWater) { // disable jumping and apply movement speed reduction in water
             this.body.setAllowGravity(false);
@@ -132,17 +134,16 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.wasInWater = false;
         }
 
-        if ((this.body.onFloor() || this.body.touching.down) && !this.jumping && input.down && !this.crouching) { // crouch
+        // crouch code
+        if ((this.body.onFloor() || this.body.touching.down) && !this.jumping && input.down && !this.crouching) {
             this.crouch();
         }
         if (!input.down && this.crouching) { // uncrouch
             this.uncrouch();
         }
 
-        //console.log(this.slideDirection);
-
         if (this.sliding) {
-            targetXVelocity = targetXVelocity * 1.5;
+            targetXVelocity = targetXVelocity * 1.2;
             this.body.setVelocityY(0);
         }
 
@@ -163,6 +164,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
     jump(time) {
         this.jumping = true;
+        this.canSlide = true;
         this.onIce = false;
         if (this.crouching || this.wasInWater) { // smaller jump when crouching or leaving water
             this.body.setVelocityY(-500);
@@ -198,13 +200,13 @@ export default class Player extends Phaser.GameObjects.Sprite {
         console.log("slide");
         this.displayHeight = 60;
         this.body.y = this.body.y + 20;
-        this.slideDuration = time.now + 500;
-        this.slideTimer = time.now + 1000;
+        this.slideDuration = time.now + 400;
         this.sliding = true;
     }
 
     unslide() {
         console.log("unslide");
+        this.canSlide = false
         let foundTiles = [];
         let preventUncrouch = false; //prevent crouch if tiles block player
         foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y-40,55,40);
