@@ -7,6 +7,8 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
         this.alpha = 0;
         config.scene.physics.world.enable(this);
         this.body.allowGravity = false;
+
+        this.shape = config.scene.make.graphics()
     }
 
     bump(tile) {
@@ -44,5 +46,10 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
         //create particles
         //destroy block
         this.scene.map.removeTile(tile);
+
+        let emitter = this.scene.blockEmitter.emitters.getByName('block-break');
+        emitter.setFrame(tile.index-1);
+
+        this.scene.blockEmitter.emitParticle(1, tile.pixelX, tile.pixelY);
     }
 }

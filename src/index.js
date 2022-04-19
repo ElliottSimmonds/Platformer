@@ -43,6 +43,22 @@ class MyGame extends Phaser.Scene {
         this.groundLayer.setCollisionBetween(1, 25);
 
         this.specialTiles = this.physics.add.group();
+
+        //animation stuff
+        this.blockEmitter = this.add.particles('tiles');
+
+        this.blockEmitter.createEmitter({
+            frame: 0,
+            name: 'block-break',
+            gravityY: 1000,
+            lifespan: 2000,
+            speed: 400,
+            angle: {
+                min: -90 - 25,
+                max: -45 - 25
+            },
+            frequency: -1
+        });
         
         //create the player
         //add keys for each body part?
@@ -133,7 +149,7 @@ class MyGame extends Phaser.Scene {
             if (tile.properties.pushable) {
                 tile.body.allowDrag = true;
                 tile.body.setAllowDrag(true);
-                tile.body.setDrag(300,300);
+                tile.body.setDrag(800,300); // set vertical drag to 700 if gravity is disabled
             }
             if (tile.properties.gravity) {
                 tile.body.allowGravity = true;
