@@ -46,10 +46,8 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
         //create particles
         //destroy block
         this.scene.map.removeTile(tile);
+        //emitter.setFrame(tile.index-1);
 
-        let emitter = this.scene.blockEmitter.emitters.getByName('block-break');
-        emitter.setFrame(tile.index-1);
-
-        this.scene.blockEmitter.emitParticle(1, tile.pixelX, tile.pixelY);
+        this.scene.blockEmitter.emitParticle(10, tile.pixelX, tile.pixelY);
     }
 }

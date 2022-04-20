@@ -8,6 +8,7 @@ import body from './assets/body1.png';
 
 import tilemap from './assets/test_tilemap.json';
 import tilemapImg from './assets/tile1.png';
+import particleImg from './assets/break-particles.png';
 
 import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
@@ -33,6 +34,12 @@ class MyGame extends Phaser.Scene {
             frameHeight: 64,
             spacing: 0
         });
+
+        this.load.spritesheet('particles', particleImg, {
+            frameWidth: 20,
+            frameHeight: 20,
+            spacing: 0
+        });
     }
       
     create() {
@@ -45,19 +52,23 @@ class MyGame extends Phaser.Scene {
         this.specialTiles = this.physics.add.group();
 
         //animation stuff
-        this.blockEmitter = this.add.particles('tiles');
+        this.blockEmitter = this.add.particles('particles');
+        let shape1 = new Phaser.Geom.Rectangle(0, 0, 64, 64);
 
+        // change to preset that can be created with key?
         this.blockEmitter.createEmitter({
-            frame: 0,
+            frame: Phaser.Utils.Array.NumberArray(1, 5),
+            randomFrame: true,
             name: 'block-break',
             gravityY: 1000,
-            lifespan: 2000,
+            lifespan: 1000,
             speed: 400,
-            angle: {
-                min: -90 - 25,
-                max: -45 - 25
-            },
-            frequency: -1
+            frequency: -1,
+            angle: { min: -90 - 25,max: -45 - 25},
+            emitZone: {type: 'random', source: shape1},
+            rotate: { min: -180, max: 180 },
+            lifespan: { min: 1000, max: 1100 },
+            alpha: { start: 1, end: 0 }
         });
         
         //create the player
