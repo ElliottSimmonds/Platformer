@@ -200,7 +200,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
     slide(time) { // sliding gives a short boost to movement speed and allows player to fit in 1 block gaps. stops ability to change direction. jumping stops sliding. can only slide once in air
         this.displayHeight = 60;
-        this.body.y = this.body.y + 20;
+        this.body.y = this.body.y - 20;
         this.slideDuration = time.now + 400;
         this.sliding = true;
         this.body.setAllowGravity(false);
@@ -211,15 +211,15 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.body.setAllowGravity(true);
         let foundTiles = [];
         let preventUncrouch = false; //prevent crouch if tiles block player
-        foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y-40,55,40);
+        foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y+60,55,40);
         foundTiles.forEach((tile) => {
-            if (tile.index != -1 && tile.collideDown) { // change to tile collision property which we will add later
+            if (tile.index != -1 && tile.collideUp) { // change to tile collision property which we will add later
                 preventUncrouch = true;
             }
         })
         if (!preventUncrouch) {
             this.displayHeight = 100;
-            this.body.y = this.body.y - 20;
+            this.body.y = this.body.y + 20;
             this.sliding = false;
             this.slideDirection = '';
         } else { // start crouching
