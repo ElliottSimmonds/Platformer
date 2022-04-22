@@ -46,8 +46,29 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
         //create particles
         //destroy block
         this.scene.map.removeTile(tile);
-        //emitter.setFrame(tile.index-1);
 
-        this.scene.blockEmitter.emitParticle(10, tile.pixelX, tile.pixelY);
+        let particle = this.scene.make.image({x:0, y:0, key:'tiles'},false);
+        particle.setFrame(tile.index-1);
+        particle.setCrop(0,0,20,20);
+
+        let rt = this.scene.make.renderTexture({ width: 64, height: 64 }, false);
+        rt.draw(particle, 32, 32);
+        rt.saveTexture('particles');
+        
+        this.blockEmitter = this.scene.add.particles('particles');
+        this.blockEmitter.createEmitter({
+            name: 'block-break',
+            gravityY: 1000,
+            lifespan: 1000,
+            speed: 400,
+            frequency: -1,
+            angle: { min: -90 - 25, max: -45 - 25},
+            emitZone: {type: 'random', source: new Phaser.Geom.Rectangle(0, 0, 64, 64)},
+            rotate: { min: -180, max: 180 },
+            lifespan: { min: 1000, max: 1100 },
+            alpha: { start: 1, end: 0 }
+        });
+
+        this.blockEmitter.emitParticle(10, tile.pixelX, tile.pixelY);
     }
 }

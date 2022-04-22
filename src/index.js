@@ -35,11 +35,11 @@ class MyGame extends Phaser.Scene {
             spacing: 0
         });
 
-        this.load.spritesheet('particles', particleImg, {
+        this.load.spritesheet('tileParts', particleImg, {
             frameWidth: 20,
             frameHeight: 20,
             spacing: 0
-        });
+        });    
     }
       
     create() {
@@ -51,26 +51,6 @@ class MyGame extends Phaser.Scene {
 
         this.specialTiles = this.physics.add.group();
 
-        //animation stuff
-        this.blockEmitter = this.add.particles('particles');
-        let shape1 = new Phaser.Geom.Rectangle(0, 0, 64, 64);
-
-        // change to preset that can be created with key?
-        this.blockEmitter.createEmitter({
-            frame: Phaser.Utils.Array.NumberArray(1, 5),
-            randomFrame: true,
-            name: 'block-break',
-            gravityY: 1000,
-            lifespan: 1000,
-            speed: 400,
-            frequency: -1,
-            angle: { min: -90 - 25,max: -45 - 25},
-            emitZone: {type: 'random', source: shape1},
-            rotate: { min: -180, max: 180 },
-            lifespan: { min: 1000, max: 1100 },
-            alpha: { start: 1, end: 0 }
-        });
-        
         //create the player
         //add keys for each body part?
         this.player = new Player({
@@ -78,7 +58,7 @@ class MyGame extends Phaser.Scene {
             x: 300,
             y: 200,
             key: 'chad'
-        })
+        });
 
         this.groundLayer.forEachTile(tile => {
             if (tile.properties.up) { // have to write it this way because tiled is retarded and doesnt save default properties to map file
