@@ -47,28 +47,44 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
         //destroy block
         this.scene.map.removeTile(tile);
 
-        let particle = this.scene.make.image({x:0, y:0, key:'tiles'},false);
-        particle.setFrame(tile.index-1);
-        particle.setCrop(0,0,20,20);
+        //TODO: Figure out how to create shapes other than rectangles. Maybe use bitmap instead of crop
+        // Maybe leave gaps around particles. They seem to bleed into eachother a bit, possibly due to anti aliasing on crop
+        const rectArray = [ // shapes for each particle to use for cropping
+            new Phaser.Geom.Rectangle(0, 0, 20, 20),
+            new Phaser.Geom.Rectangle(10, 20, 20, 20),
+            new Phaser.Geom.Rectangle(44, 20, 20, 20),
+            new Phaser.Geom.Rectangle(20, 44, 20, 20),
+            new Phaser.Geom.Rectangle(0, 32, 10, 10),
+            new Phaser.Geom.Rectangle(32, 32, 10, 10),
+        ]
 
-        let rt = this.scene.make.renderTexture({ width: 64, height: 64 }, false);
-        rt.draw(particle, 32, 32);
-        rt.saveTexture('particles');
+        let particle = this.scene.make.image({x:0, y:0, key:'tiles'},false);
+        let rt = this.scene.make.renderTexture({ width: 20*rectArray.length, height: 20 }, false);
+        let particleTexture = rt.saveTexture('particles');
+
+        particle.setFrame(tile.index-1);
+
+        for (let i = 0; i < rectArray.length; i++) { // creates and draws 6 particle shapes
+            particle.setCrop(rectArray[i]);
+            rt.draw(particle, 32-rectArray[i].x+(20*i), 32-rectArray[i].y);
+            particleTexture.add(i, 0, (20*i), 0, 20, 20);
+        }
         
         this.blockEmitter = this.scene.add.particles('particles');
         this.blockEmitter.createEmitter({
+            frame: Phaser.Utils.Array.NumberArray(0, 5),
+            randomFrame: true,
             name: 'block-break',
             gravityY: 1000,
-            lifespan: 1000,
+            lifespan: 1500,
             speed: 400,
             frequency: -1,
             angle: { min: -90 - 25, max: -45 - 25},
-            emitZone: {type: 'random', source: new Phaser.Geom.Rectangle(0, 0, 64, 64)},
+            emitZone: {type: 'random', source: new Phaser.Geom.Rectangle(0, 0, 54, 54)},
             rotate: { min: -180, max: 180 },
-            lifespan: { min: 1000, max: 1100 },
-            alpha: { start: 1, end: 0 }
+            //alpha: { start: 1, end: 0 }
         });
 
-        this.blockEmitter.emitParticle(10, tile.pixelX, tile.pixelY);
+        this.blockEmitter.emitParticle(12, tile.pixelX, tile.pixelY);
     }
 }
