@@ -82,7 +82,7 @@ export default class AnimatedTile extends Phaser.GameObjects.Sprite { // change 
             angle: { min: -90 - 25, max: -45 - 25},
             emitZone: {type: 'random', source: new Phaser.Geom.Rectangle(0, 0, 54, 54)},
             rotate: { min: -180, max: 180 },
-            //alpha: { start: 1, end: 0 }
+            alpha: { start: 1, end: 0 }
         });
 
         this.blockEmitter.emitParticle(12, tile.pixelX, tile.pixelY);

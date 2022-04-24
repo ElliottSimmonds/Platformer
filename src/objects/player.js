@@ -197,7 +197,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.crouching = false;
         }
     }
-
+    // TODO: fix sliding so it can be performed when falling not just jumping
     slide(time) { // sliding gives a short boost to movement speed and allows player to fit in 1 block gaps. stops ability to change direction. jumping stops sliding. can only slide once in air
         this.displayHeight = 60;
         this.body.y = this.body.y - 20;

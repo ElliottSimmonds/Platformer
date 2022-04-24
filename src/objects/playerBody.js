@@ -59,7 +59,7 @@ export default class PlayerBody {
         this.stopWalk();
     }
 
-    startTween() { 
+    startTween() {
         if (!this.bobhead.isPlaying()) {
             this.bobhead.resume();
         }

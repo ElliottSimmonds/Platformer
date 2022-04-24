@@ -87,7 +87,12 @@ class MyGame extends Phaser.Scene {
                 tile.collideDown = false;
                 tile.collideLeft = false;
                 tile.collideRight = false;
+                this.groundLayer.setTileIndexCallback(tile.index, this.inWater, this);
             }
+
+            //if (tile.properties.vanishing) {
+            //    this.groundLayer.setTileIndexCallback(tile.index, this.vanish, this);
+            //}
 
             // sets faces to interesting for collision detection
             // NOTE: no need to do this for tiles with no collision, might be worth adding to condition
@@ -129,12 +134,10 @@ class MyGame extends Phaser.Scene {
                 this.map.removeTile(tile);
             }
         });
-        this.groundLayer.setTileIndexCallback(7, this.inWater, this);
         this.physics.add.collider(this.player, this.groundLayer);
         this.physics.add.collider(this.player, this.specialTiles);
         this.physics.add.collider(this.specialTiles, this.groundLayer);
         this.physics.add.collider(this.specialTiles, this.specialTiles);
-        console.log(this.specialTiles)
 
         this.specialTiles.getChildren().forEach(tile => {
             if (tile.properties.pushable) {
