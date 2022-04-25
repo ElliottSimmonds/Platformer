@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import dragonBones from './plugins/dragonBones.min.js';
 
 //image paths
 import bgImg from './assets/sky.png';
@@ -13,6 +14,10 @@ import particleImg from './assets/break-particles.png';
 import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
 import SpecialTile from './objects/specialTile';
+
+import skeleTex from './assets/skeleton/Dragon_tex.png';
+import skeleTex2 from './assets/skeleton/Dragon_tex.json';
+import ske from './assets/skeleton/Dragon_ske.json';
 
 class MyGame extends Phaser.Scene {
 
@@ -39,7 +44,14 @@ class MyGame extends Phaser.Scene {
             frameWidth: 20,
             frameHeight: 20,
             spacing: 0
-        });    
+        });
+
+        //this.load.dragonbone(
+        //    "Dragon",
+        //    skeleTex,
+        //    skeleTex2,
+        //    ske,
+        //);
     }
       
     create() {
@@ -48,6 +60,11 @@ class MyGame extends Phaser.Scene {
         this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
+        
+        //const arm = this.add.armature("Dragon", "Dragon");
+        //arm.x = 400;
+        //arm.y = 300;
+        //arm.animation.play("walk");
 
         this.specialTiles = this.physics.add.group();
 
@@ -280,6 +297,15 @@ const config = {
             gravity: { y: 900 },
             debug: true
         }
+    },
+    plugins: {
+        scene: [
+            {
+                key: 'DragonBones',
+                plugin: dragonBones.phaser.plugin.DragonBonesScenePlugin,
+                mapping: "dragonbone"
+            }
+        ],
     }
 };
 
