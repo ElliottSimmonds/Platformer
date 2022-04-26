@@ -180,6 +180,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.displayHeight = 60;
         this.body.y = this.body.y + 20;
         this.crouching = true;
+        this.playerBody.crouch();
     }
 
     uncrouch() {
@@ -195,6 +196,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.displayHeight = 100;
             this.body.y = this.body.y - 20;
             this.crouching = false;
+            this.playerBody.uncrouch();
         }
     }
     // TODO: fix sliding so it can be performed when falling not just jumping
@@ -225,6 +227,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         } else { // start crouching
             this.sliding = false;
             this.crouching = true;
+            this.playerBody.crouch();
         }
     }
 

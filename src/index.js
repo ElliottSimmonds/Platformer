@@ -15,9 +15,9 @@ import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
 import SpecialTile from './objects/specialTile';
 
-import skeleTex from './assets/skeleton/Dragon_tex.png';
-import skeleTex2 from './assets/skeleton/Dragon_tex.json';
-import ske from './assets/skeleton/Dragon_ske.json';
+import playerTexAtlas from './assets/skeleton/TheDude_tex.png';
+import playerTexJson from './assets/skeleton/TheDude_tex.json';
+import playerSkele from './assets/skeleton/TheDude_ske.json';
 
 class MyGame extends Phaser.Scene {
 
@@ -31,6 +31,8 @@ class MyGame extends Phaser.Scene {
         
         this.load.image('head', head);
         this.load.image('body', body);
+
+        this.plugins.installScenePlugin('dragonBones', dragonBones.phaser.plugin.DragonBonesScenePlugin, 'dragonbone', this); 
 
         // I load the tiles as a spritesheet so I can use it for both sprites and tiles,
         // Normally you should load it as an image.
@@ -46,12 +48,12 @@ class MyGame extends Phaser.Scene {
             spacing: 0
         });
 
-        //this.load.dragonbone(
-        //    "Dragon",
-        //    skeleTex,
-        //    skeleTex2,
-        //    ske,
-        //);
+        this.load.dragonbone(
+            "playerbody",
+            playerTexAtlas,
+            playerTexJson,
+            playerSkele,
+        );
     }
       
     create() {
@@ -60,11 +62,6 @@ class MyGame extends Phaser.Scene {
         this.groundTiles = this.map.addTilesetImage('tileset', 'tiles');
         this.groundLayer = this.map.createLayer('Tile Layer 1', this.groundTiles, 0, 0);
         this.groundLayer.setCollisionBetween(1, 25);
-        
-        //const arm = this.add.armature("Dragon", "Dragon");
-        //arm.x = 400;
-        //arm.y = 300;
-        //arm.animation.play("walk");
 
         this.specialTiles = this.physics.add.group();
 
