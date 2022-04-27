@@ -22,11 +22,10 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
                 this.body.setVelocityX(300);
             } else if (this.body.touching.right) {
                 this.body.setVelocityX(-300);
-            } else if (this.body.touching.up) {
-                this.body.setVelocityY(300);
-            }
-            else if (this.body.touching.down) {
+            } else if (this.body.touching.down) {
                 this.body.setVelocityY(-300);
+            } else if (this.body.touching.up && !this.body.allowGravity && !this.body.onFloor()) {
+                this.body.setVelocityY(300);
             }
         }
     }
