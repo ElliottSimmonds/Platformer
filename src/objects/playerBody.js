@@ -8,42 +8,60 @@ export default class PlayerBody {
         this.armature.y = config.y;
     }
 
-    update(playerBody) {
+    update(player, input) {
         let xOffset = 0;
         let yOffset = 0;
-        if (this.scene.player.crouching) {
-            yOffset = -20
+
+        if (input.left) {
+            this.armature.armature.flipX = 1;
+        } else if (input.right) {
+            this.armature.armature.flipX = 0;
         }
-        
-        this.armature.x = playerBody.center.x + xOffset;
-        this.armature.y = playerBody.center.y + yOffset;
+
+        if (player.crouching) {
+            yOffset = -20
+            this.crouch()
+        } else if (player.inWater && !player.body.onFloor()) {
+            this.swim()
+        } else if (!player.body.onFloor()) {
+            this.jump()
+        } else if (input.left || input.right) {
+            this.walk();
+        } else {
+            this.stop();
+        }
+
+        this.armature.x = player.body.center.x + xOffset;
+        this.armature.y = player.body.center.y + yOffset;
     }
 
-    left() {
-        this.armature.armature.flipX = 1;
-        if(!this.armature.animation.getState("walk") && !this.armature.animation.getState("crouch")) {
-            this.armature.animation.play("walk");
-        };
-    }
-
-    right() {
-        this.armature.armature.flipX = 0;
-        if(!this.armature.animation.getState("walk") && !this.armature.animation.getState("crouch")) {
+    walk() {
+        if(!this.armature.animation.getState("walk")) {
             this.armature.animation.play("walk");
         };
     }
 
     crouch() {
-        this.armature.animation.play("crouch");
-    }
-
-    uncrouch() {
-        this.armature.animation.play("idle");
+        if(!this.armature.animation.getState("crouch")) {
+            this.armature.animation.play("crouch");
+        }
     }
 
     stop() {
-        if(!this.armature.animation.getState("idle") && !this.armature.animation.getState("crouch")) {
+        if(!this.armature.animation.getState("idle")) {
             this.armature.animation.play("idle");
+        };
+    }
+
+    jump() {
+        if(!this.armature.animation.getState("jump")) {
+            this.armature.animation.gotoAndPlayByFrame("jump", 0, 1);
+        }
+    }
+
+    swim() {
+        if(!this.armature.animation.getState("swim")) {
+            this.armature.animation.play("swim");
         };
     }
 };

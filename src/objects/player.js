@@ -14,6 +14,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         //this.body.setCollideWorldBounds(true);
         this.visible = false;
 
+        //move these attributes into a single attribute?
         this.jumpTimer = 0;
         this.slideDuration = 0;
         this.canSlide = false;
@@ -57,17 +58,14 @@ export default class Player extends Phaser.GameObjects.Sprite {
             } else {
                 targetXVelocity += -this.runSpeed;
             }
-            this.playerBody.left();
         } else if (input.right || (this.sliding && this.slideDirection === 'right')) {
             if (this.crouching) {
                 targetXVelocity += this.crouchSpeed;
             } else {
                 targetXVelocity += this.runSpeed;
             }
-            this.playerBody.right();
         } else {
             targetXVelocity = 0;
-            this.playerBody.stop();
         }
 
         if (this.boostDirection === 'left') {
@@ -79,7 +77,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
         // slide code
         if (input.shift && !this.sliding && !this.inWater && this.canSlide) {
             this.slide(time);
-            this.playerBody.spriteContainer.scaleX === -1 ? this.slideDirection = 'left' : this.slideDirection = 'right';
         }
         if ((!input.shift && this.sliding) || (time.now > this.slideDuration && this.sliding)) { // unslide when slide button is released or slide timer expires
             this.unslide();
@@ -113,7 +110,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.body.setVelocityY(newYVelocity);
             
             targetXVelocity = targetXVelocity*0.75;
-            this.inWater = false;
         } else {
             if (this.wasInWater) {
                 this.body.setAllowGravity(true);
@@ -161,7 +157,9 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.body.setVelocityX(newXVelocity);
         this.boostDirection = '';
 
-        this.playerBody.update(this.body);
+        this.playerBody.update(this, input);
+
+        this.inWater = false;
     }
 
     jump(time) {
@@ -180,7 +178,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.displayHeight = 60;
         this.body.y = this.body.y + 20;
         this.crouching = true;
-        this.playerBody.crouch();
     }
 
     uncrouch() {
@@ -196,7 +193,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.displayHeight = 100;
             this.body.y = this.body.y - 20;
             this.crouching = false;
-            this.playerBody.uncrouch();
         }
     }
     // TODO: fix sliding so it can be performed when falling not just jumping
@@ -227,7 +223,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
         } else { // start crouching
             this.sliding = false;
             this.crouching = true;
-            this.playerBody.crouch();
         }
     }
 
