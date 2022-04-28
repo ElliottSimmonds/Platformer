@@ -64,6 +64,7 @@ class MyGame extends Phaser.Scene {
         this.groundLayer.setCollisionBetween(1, 25);
 
         this.specialTiles = this.physics.add.group();
+        this.vanishedTiles = []; // array storing tiles that have vanished. they are removed when they reappear
 
         //create the player
         //add keys for each body part?
@@ -236,24 +237,71 @@ class MyGame extends Phaser.Scene {
             tile.update();
         })
 
+        if (this.vanishedTiles.length > 0) {
+            this.vanishedTiles.forEach((tile, index) => {
+                if (!Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), tile.getBounds())) {
+                    if (!tile.bumping) {
+                        let bumpTile = new AnimatedTile({
+                            scene: this,
+                            tile: tile
+                        });
+                        bumpTile.reappear(tile);
+                    }
+                    tile.collideUp = true;
+                    tile.collideDown = true;
+                    tile.collideLeft = true;
+                    tile.collideRight = true;
+                    this.map.calculateFacesAt(tile.x, tile.y, this.groundLayer);
+                    setTimeout(function () {tile.alpha = 1;}, 500);
+    
+                    this.vanishedTiles.splice(index, 1);
+                }
+            })
+        }
+
         this.player.update(this.keys, this.time);
     }
 
-    activateTile(tile, direction) { // giga function handling all the collision detection activations. for it to work, tile must have up, down, left and right properties in tiled json.
+    activateTile(tile, direction) { // giga function handling all the collision detection activations. tile have up, down, left and right properties in tiled json.
         if (tile.properties[direction] && tile.properties[direction].break) {
             this.break(tile);
-        } else if (direction === 'up') {
+        } else if (direction === 'up' && !tile.properties.vanishing) {
             //this.bounceTile.bump(tile);
             // Used when hitting a tile from below that should bounce up.
             if (!tile.bumping) {
                 let bumpTile = new AnimatedTile({
-                    scene: this
+                    scene: this,
+                    tile: tile
                 });
                 bumpTile.bump(tile);
             }
         }
         if (tile.properties[direction] && tile.properties[direction].kill) {
             this.player.die();
+        }
+
+        if (tile.properties.vanishing) { // vanish tile
+            if (!tile.bumping) {
+                let bumpTile = new AnimatedTile({
+                    scene: this,
+                    tile: tile
+                });
+                bumpTile.vanish(tile);
+
+                let vanishTile = () => {
+                    tile.collideUp = false;
+                    tile.collideDown = false;
+                    tile.collideLeft = false;
+                    tile.collideRight = false;
+                    this.map.calculateFacesAt(tile.x, tile.y, this.groundLayer);
+                };
+                setTimeout(vanishTile, 500);
+
+                let reappearTile = () => {
+                    this.vanishedTiles.push(tile);
+                }
+                setTimeout(reappearTile, 5000); // try to make tile reappear after timeout
+            }
         }
 
         if (direction === 'down') {
