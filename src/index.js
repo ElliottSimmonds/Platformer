@@ -147,6 +147,8 @@ class MyGame extends Phaser.Scene {
                 this.specialTiles.add(newSpecialTile);
                 this.map.removeTile(tile);
             }
+
+            tile.bumping = false;
         });
         this.physics.add.collider(this.player, this.groundLayer);
         this.physics.add.collider(this.player, this.specialTiles);
@@ -166,11 +168,6 @@ class MyGame extends Phaser.Scene {
             }
             tile.body.maxVelocity.x = 500;
             tile.body.maxVelocity.y = 500;
-        });
-
-        // Used when hitting a tile from below that should bounce up.
-        this.bounceTile = new AnimatedTile({
-            scene: this
         });
 
         this.keys = {
@@ -244,9 +241,16 @@ class MyGame extends Phaser.Scene {
 
     activateTile(tile, direction) { // giga function handling all the collision detection activations. for it to work, tile must have up, down, left and right properties in tiled json.
         if (tile.properties[direction] && tile.properties[direction].break) {
-            this.bounceTile.break(tile);
+            this.break(tile);
         } else if (direction === 'up') {
-            this.bounceTile.bump(tile);
+            //this.bounceTile.bump(tile);
+            // Used when hitting a tile from below that should bounce up.
+            if (!tile.bumping) {
+                let bumpTile = new AnimatedTile({
+                    scene: this
+                });
+                bumpTile.bump(tile);
+            }
         }
         if (tile.properties[direction] && tile.properties[direction].kill) {
             this.player.die();
@@ -274,6 +278,52 @@ class MyGame extends Phaser.Scene {
                 this.player.safeZone.y = tile.pixelY-(tile.height);
             }
         }
+    }
+
+    break(tile) {
+        //create particles
+        //destroy block
+        this.map.removeTile(tile);
+
+        //TODO: Figure out how to create shapes other than rectangles. Maybe use bitmap instead of crop
+        // Maybe leave gaps around particles. They seem to bleed into eachother a bit, possibly due to anti aliasing on crop
+        const rectArray = [ // shapes for each particle to use for cropping
+            new Phaser.Geom.Rectangle(0, 0, 20, 20),
+            new Phaser.Geom.Rectangle(10, 20, 20, 20),
+            new Phaser.Geom.Rectangle(44, 20, 20, 20),
+            new Phaser.Geom.Rectangle(20, 44, 20, 20),
+            new Phaser.Geom.Rectangle(0, 32, 10, 10),
+            new Phaser.Geom.Rectangle(32, 32, 10, 10),
+        ]
+
+        let particle = this.make.image({x:0, y:0, key:'tiles'},false);
+        let rt = this.make.renderTexture({ width: 20*rectArray.length, height: 20 }, false);
+        let particleTexture = rt.saveTexture('particles');
+
+        particle.setFrame(tile.index-1);
+
+        for (let i = 0; i < rectArray.length; i++) { // creates and draws 6 particle shapes
+            particle.setCrop(rectArray[i]);
+            rt.draw(particle, 32-rectArray[i].x+(20*i), 32-rectArray[i].y);
+            particleTexture.add(i, 0, (20*i), 0, 20, 20);
+        }
+        
+        this.blockEmitter = this.add.particles('particles');
+        this.blockEmitter.createEmitter({
+            frame: Phaser.Utils.Array.NumberArray(0, 5),
+            randomFrame: true,
+            name: 'block-break',
+            gravityY: 1000,
+            lifespan: 1500,
+            speed: 400,
+            frequency: -1,
+            angle: { min: -90 - 25, max: -45 - 25},
+            emitZone: {type: 'random', source: new Phaser.Geom.Rectangle(0, 0, 54, 54)},
+            rotate: { min: -180, max: 180 },
+            alpha: { start: 1, end: 0 }
+        });
+
+        this.blockEmitter.emitParticle(12, tile.pixelX, tile.pixelY);
     }
 
     inWater(player, tile) {
