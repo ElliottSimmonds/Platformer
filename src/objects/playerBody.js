@@ -19,8 +19,13 @@ export default class PlayerBody {
         }
 
         if (player.crouching) {
-            yOffset = -20
-            this.crouch()
+            if (input.left || input.right) {
+                this.crouchWalk();
+            } else {
+                this.crouch()
+            }
+        } else if (player.sliding) {
+            this.dash();
         } else if (player.inWater && !player.body.onFloor()) {
             this.swim()
         } else if (!player.body.onFloor()) {
@@ -47,6 +52,12 @@ export default class PlayerBody {
         }
     }
 
+    crouchWalk() {
+        if(!this.armature.animation.getState("crouch-walk")) {
+            this.armature.animation.play("crouch-walk");
+        }
+    }
+
     stop() {
         if(!this.armature.animation.getState("idle")) {
             this.armature.animation.play("idle");
@@ -56,6 +67,12 @@ export default class PlayerBody {
     jump() {
         if(!this.armature.animation.getState("jump")) {
             this.armature.animation.gotoAndPlayByFrame("jump", 0, 1);
+        }
+    }
+
+    dash() {
+        if(!this.armature.animation.getState("dash")) {
+            this.armature.animation.play("dash");
         }
     }
 
