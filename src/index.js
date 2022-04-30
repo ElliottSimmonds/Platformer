@@ -139,7 +139,7 @@ class MyGame extends Phaser.Scene {
             tile.bumping = false;
         });
         this.physics.add.collider(this.player, this.groundLayer);
-        this.physics.add.collider(this.player, this.specialTiles);
+        this.physics.add.collider(this.player, this.specialTiles, function(player, tile) { tile.bump(player, tile)});
         this.physics.add.collider(this.specialTiles, this.groundLayer);
         this.physics.add.collider(this.specialTiles, this.specialTiles);
 
