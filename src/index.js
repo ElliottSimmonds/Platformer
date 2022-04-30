@@ -4,12 +4,8 @@ import dragonBones from './plugins/dragonBones.min.js';
 //image paths
 import bgImg from './assets/sky.png';
 
-import head from './assets/head1.png';
-import body from './assets/body1.png';
-
 import tilemap from './assets/test_tilemap.json';
 import tilemapImg from './assets/tile1.png';
-import particleImg from './assets/break-particles.png';
 
 import Player from './objects/player';
 import AnimatedTile from './objects/animatedTile';
@@ -28,9 +24,6 @@ class MyGame extends Phaser.Scene {
     preload() {
         this.load.image('bg', bgImg);
         this.load.tilemapTiledJSON('map', tilemap);
-        
-        this.load.image('head', head);
-        this.load.image('body', body);
 
         this.plugins.installScenePlugin('dragonBones', dragonBones.phaser.plugin.DragonBonesScenePlugin, 'dragonbone', this); 
 
@@ -39,12 +32,6 @@ class MyGame extends Phaser.Scene {
         this.load.spritesheet('tiles', tilemapImg, {
             frameWidth: 64,
             frameHeight: 64,
-            spacing: 0
-        });
-
-        this.load.spritesheet('tileParts', particleImg, {
-            frameWidth: 20,
-            frameHeight: 20,
             spacing: 0
         });
 
@@ -160,7 +147,7 @@ class MyGame extends Phaser.Scene {
             if (tile.properties.pushable) {
                 tile.body.allowDrag = true;
                 tile.body.setAllowDrag(true);
-                tile.body.setDrag(800,300); // set vertical drag to 700 if gravity is disabled
+                tile.body.setDrag(800,300); // set vertical drag to 300 if gravity is disabled
             }
             if (tile.properties.gravity) {
                 tile.body.allowGravity = true;
@@ -235,7 +222,7 @@ class MyGame extends Phaser.Scene {
 
         this.specialTiles.getChildren().forEach(tile => {
             tile.update();
-        })
+        });
 
         if (this.vanishedTiles.length > 0) {
             this.vanishedTiles.forEach((tile, index) => {
