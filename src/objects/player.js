@@ -13,6 +13,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.body.maxVelocity.y = 900;
         //this.body.setCollideWorldBounds(true);
         this.visible = false;
+        this.smol = false; // used to ensure player y is updated after body height is updated when crouching/sliding
 
         //move these attributes into a single attribute?
         this.jumpTimer = 0;
@@ -47,18 +48,25 @@ export default class Player extends Phaser.GameObjects.Sprite {
             shift: keys.shift.isDown
         };
 
+        if (this.crouching && this.displayHeight === 60 && this.smol === false) {
+            this.body.y = this.body.y + 15;
+            this.smol = true;
+        }
+
         //
         // X Axis movement
         //
         let currentXVelocity = this.body.velocity.x;
         let targetXVelocity = 0;
         if (input.left || (this.sliding && this.slideDirection === 'left')) {
+            this.slideDirection = 'left';
             if (this.crouching) {
                 targetXVelocity += -this.crouchSpeed;
             } else {
                 targetXVelocity += -this.runSpeed;
             }
         } else if (input.right || (this.sliding && this.slideDirection === 'right')) {
+            this.slideDirection = 'right';
             if (this.crouching) {
                 targetXVelocity += this.crouchSpeed;
             } else {
@@ -75,7 +83,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         } 
 
         // slide code
-        if (input.shift && !this.sliding && !this.inWater && this.canSlide) {
+        if (input.shift && !this.inWater && this.canSlide && !this.crouching && (!this.body.onFloor() && !this.body.touching.down)) {
             this.slide(time);
         }
         if ((!input.shift && this.sliding) || (time.now > this.slideDuration && this.sliding)) { // unslide when slide button is released or slide timer expires
@@ -87,9 +95,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
         // #################
         if ((this.body.onFloor() || this.body.touching.down)) { // disable jumping when landing
             this.jumping = false;
-            this.canSlide = false;
+            this.canSlide = true;
             // unslide, make unslide auto crouch when blocked
         }
+
         if (this.inWater) { // disable jumping and apply movement speed reduction in water
             this.body.setAllowGravity(false);
             this.body.acceleration.y = 0;
@@ -164,7 +173,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
     jump(time) {
         this.jumping = true;
-        this.canSlide = true;
         this.onIce = false;
         if (this.crouching || this.wasInWater) { // smaller jump when crouching or leaving water
             this.body.setVelocityY(-500);
@@ -176,7 +184,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
 
     crouch() { //reduce player size and lower walk speed
         this.displayHeight = 60;
-        this.body.y = this.body.y + 20;
         this.crouching = true;
     }
 
@@ -193,6 +200,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.displayHeight = 100;
             this.body.y = this.body.y - 20;
             this.crouching = false;
+            this.smol = false;
         }
     }
     // TODO: fix sliding so it can be performed when falling not just jumping
@@ -201,6 +209,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.body.y = this.body.y - 20;
         this.slideDuration = time.now + 400;
         this.sliding = true;
+        this.canSlide = false;
         this.body.setAllowGravity(false);
     }
 
@@ -219,7 +228,6 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.displayHeight = 100;
             this.body.y = this.body.y + 20;
             this.sliding = false;
-            this.slideDirection = '';
         } else { // start crouching
             this.sliding = false;
             this.crouching = true;
