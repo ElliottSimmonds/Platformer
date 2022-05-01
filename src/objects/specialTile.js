@@ -18,7 +18,6 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
         //destroy block
         //console.log(this.body.touching.down && player.jumping)
 
-
         if (this.properties.pushable) {
             if (this.body.touching.left) {
                 this.body.setVelocityX(300);
@@ -26,9 +25,9 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
                 this.body.setVelocityX(-300);
             } else if (this.body.touching.down && player.jumping) {
                 console.log("hey!")
-                this.body.y = this.body.y - 2;
+                this.body.y = this.body.y - 2; // need to do this otherwise a block on a platform will be stuck?
                 this.body.setVelocityY(-400);
-            } else if (this.body.touching.up && !this.body.allowGravity && !this.body.onFloor()) {
+            } else if (this.body.touching.up && !this.properties.gravity && !this.body.onFloor()) {
                 this.body.setVelocityY(300);
             }
         }
@@ -60,6 +59,14 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
             this.body.setDragX(300);
         } else {
             this.body.setDragX(800);
+        }
+
+        // disable gravity on blocks blocked from below to make them less glitchy when stacking?
+        // makes standing on blocks a bit dodgy, needs further experimentation
+        if (this.body.allowGravity && (this.body.blocked.down || this.body.touching.down)) {
+            this.body.allowGravity = false;
+        } else {
+            this.body.allowGravity = true;
         }
     }
 }

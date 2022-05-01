@@ -226,7 +226,16 @@ class MyGame extends Phaser.Scene {
 
         if (this.vanishedTiles.length > 0) {
             this.vanishedTiles.forEach((tile, index) => {
-                if (!Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), tile.getBounds())) {
+
+                let specialOverlap = false;
+
+                this.specialTiles.getChildren().forEach(stile => {
+                    if (Phaser.Geom.Intersects.RectangleToRectangle(stile.getBounds(), tile.getBounds())) {
+                        specialOverlap = true;
+                    }
+                });
+
+                if (!Phaser.Geom.Intersects.RectangleToRectangle(this.player.getBounds(), tile.getBounds()) && !specialOverlap) {
                     if (!tile.bumping) {
                         let bumpTile = new AnimatedTile({
                             scene: this,
@@ -243,7 +252,7 @@ class MyGame extends Phaser.Scene {
     
                     this.vanishedTiles.splice(index, 1);
                 }
-            })
+            });
         }
 
         this.player.update(this.keys, this.time);
