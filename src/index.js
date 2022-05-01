@@ -102,23 +102,38 @@ class MyGame extends Phaser.Scene {
             let adjDown = this.groundLayer.getTileAt(tile.x, tile.y+1);
             let adjLeft = this.groundLayer.getTileAt(tile.x-1, tile.y);
             let adjRight = this.groundLayer.getTileAt(tile.x+1, tile.y);
-            if (adjUp) { // if adjacent tile has collision disabled on connected face, set tile face as interesting
-                if ((adjUp.properties.down && adjUp.properties.down.collide === false) || adjUp.properties.water) {
+
+            // convoluted way of doing things, doesn't matter if it's inefficient because its in create though
+            // if adjacent tile has collision disabled on any face, connecting face is made interesting to avoid clipping
+            if (adjUp) { 
+                if ((adjUp.properties.up       && adjUp.properties.up.collide === false) ||
+                    (adjUp.properties.down     && adjUp.properties.down.collide === false) ||
+                    (adjUp.properties.left     && adjUp.properties.left.collide === false) ||
+                    (adjUp.properties.right    && adjUp.properties.right.collide === false) || adjUp.properties.water) {
                     tile.faceTop = true; 
                 };
             }
             if (adjDown) {
-                if ((adjDown.properties.up && adjDown.properties.up.collide === false) || adjDown.properties.water) {
+                if ((adjDown.properties.up     && adjDown.properties.up.collide === false) ||
+                    (adjDown.properties.down   && adjDown.properties.down.collide === false) ||
+                    (adjDown.properties.left   && adjDown.properties.left.collide === false) ||
+                    (adjDown.properties.right  && adjDown.properties.right.collide === false) || adjDown.properties.water) {
                     tile.faceBottom = true; 
                 };
             }
             if (adjLeft) {
-                if ((adjLeft.properties.right && adjLeft.properties.right.collide === false) || adjLeft.properties.water) {
+                if ((adjLeft.properties.up     && adjLeft.properties.up.collide === false) ||
+                    (adjLeft.properties.down   && adjLeft.properties.down.collide === false) ||
+                    (adjLeft.properties.left   && adjLeft.properties.left.collide === false) ||
+                    (adjLeft.properties.right  && adjLeft.properties.right.collide === false) || adjLeft.properties.water) {
                     tile.faceLeft = true; 
                 };
             }
             if (adjRight) {
-                if ((adjRight.properties.left && adjRight.properties.left.collide === false) || adjRight.properties.water) {
+                if ((adjRight.properties.up    && adjRight.properties.up.collide === false) ||
+                    (adjRight.properties.down  && adjRight.properties.down.collide === false) ||
+                    (adjRight.properties.left  && adjRight.properties.left.collide === false) ||
+                    (adjRight.properties.right && adjRight.properties.right.collide === false) || adjRight.properties.water) {
                     tile.faceRight = true; 
                 };
             }
