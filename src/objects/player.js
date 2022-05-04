@@ -27,6 +27,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
         this.inWater = false;
         this.wasInWater = false; // track when leaving water to allow jump out
         this.bufferJump = false;
+        this.preventJump = false;
 
         this.playerBody = new PlayerBody({
             scene: this.scene,
@@ -183,11 +184,11 @@ export default class Player extends Phaser.GameObjects.Sprite {
             this.bufferJump = false;
         } else if (this.crouching) {
             let foundTiles = [];
-            let preventJump = false;
+            this.preventJump = false;
             foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y-50,55,50);
             foundTiles.forEach((tile) => {
                 if (tile.index != -1 && tile.collideDown) { // change to tile collision property which we will add later
-                    preventJump = true;
+                    this.preventJump = true;
                     if (this.body.onFloor()) {
                         this.bufferJump = true;
                     } else {
@@ -195,7 +196,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
                     }
                 }
             })
-            if (!preventJump) { // if crouched under block, prevent jumping
+            if (!this.preventJump) { // if crouched under block, prevent jumping
                 this.onIce = false;
                 this.body.setVelocityY(-500);
                 this.bufferJump = false;

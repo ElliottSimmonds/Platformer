@@ -105,6 +105,7 @@ class MyGame extends Phaser.Scene {
 
             // convoluted way of doing things, doesn't matter if it's inefficient because its in create though
             // if adjacent tile has collision disabled on any face, connecting face is made interesting to avoid clipping
+            //dodgy with vanishing tiles still. recalculating faces fucks this up!
             if (adjUp) { 
                 if ((adjUp.properties.up       && adjUp.properties.up.collide === false) ||
                     (adjUp.properties.down     && adjUp.properties.down.collide === false) ||
@@ -197,9 +198,6 @@ class MyGame extends Phaser.Scene {
         // ####################        
         let collisionDict = {};
         // run getTilesWithinWorldXY for an area on each side of the player to get collision tiles when blocked in a certain direction
-        if (this.player.body.blocked.up) {
-            collisionDict.up = this.map.getTilesWithinWorldXY(this.player.body.x, this.player.body.y-5, this.player.body.width, 5);
-        }
         if (this.player.body.blocked.down) {
             collisionDict.down = this.map.getTilesWithinWorldXY(this.player.body.x, this.player.body.y+this.player.body.height, this.player.body.width, 5);
         }
@@ -208,6 +206,11 @@ class MyGame extends Phaser.Scene {
         }
         if (this.player.body.blocked.right) {
             collisionDict.right = this.map.getTilesWithinWorldXY(this.player.body.x+this.player.body.width, this.player.body.y, 5, this.player.body.height);
+        }
+        if (this.player.crouching && this.player.preventJump && (this.keys.jump.isDown || this.keys.jump2.isDown)) {
+            collisionDict.up = this.map.getTilesWithinWorldXY(this.player.body.x,this.player.body.y-50,this.player.body.width,50); // 50 is crouch height
+        } else if (this.player.body.blocked.up) {
+            collisionDict.up = this.map.getTilesWithinWorldXY(this.player.body.x, this.player.body.y-5, this.player.body.width, 5);
         }
         Object.keys(collisionDict).forEach(key => {
             let triggerTile;
@@ -219,7 +222,7 @@ class MyGame extends Phaser.Scene {
                     (key === 'left' && tile.collideRight) ||
                     (key === 'right' && tile.collideLeft)
                 )) {
-                    if (triggerTile) {
+                    if (triggerTile) { // prioritise tile closest to center
                         let triggerDistance = Phaser.Math.Distance.Between(triggerTile.getCenterX(), triggerTile.getCenterY(), this.player.body.center.x, this.player.body.center.y);
                         let tileDistance = Phaser.Math.Distance.Between(tile.getCenterX(), tile.getCenterY(), this.player.body.center.x, this.player.body.center.y);
                         if (tileDistance < triggerDistance) {
