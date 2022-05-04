@@ -33,7 +33,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
             scene: this.scene,
         });
 
-        this.crouchSpeed = 300;
+        this.crouchSpeed = 250;
         this.runSpeed = 400;
         this.boostSpeed = 800;
         this.boostDirection = '';
@@ -62,14 +62,14 @@ export default class Player extends Phaser.GameObjects.Sprite {
         let targetXVelocity = 0;
         if (input.left || (this.sliding && this.slideDirection === 'left')) {
             this.slideDirection = 'left';
-            if (this.crouching) {
+            if (this.crouching && !this.sliding) {
                 targetXVelocity += -this.crouchSpeed;
             } else {
                 targetXVelocity += -this.runSpeed;
             }
         } else if (input.right || (this.sliding && this.slideDirection === 'right')) {
             this.slideDirection = 'right';
-            if (this.crouching) {
+            if (this.crouching && !this.sliding) {
                 targetXVelocity += this.crouchSpeed;
             } else {
                 targetXVelocity += this.runSpeed;
@@ -82,38 +82,35 @@ export default class Player extends Phaser.GameObjects.Sprite {
             targetXVelocity += -this.boostSpeed;
         } else if (this.boostDirection === 'right') {
             targetXVelocity += this.boostSpeed;
-        } 
+        }
 
-        // slide code
-        //if (input.shift && !this.inWater && this.canSlide && !this.crouching && (!this.body.onFloor() && !this.body.touching.down)) {
-        //    this.slide(time);
-        //}
-        //if ((!input.shift && this.sliding) || (time.now > this.slideDuration && this.sliding)) { // unslide when slide button is released or slide timer expires
-        //    this.unslide();
-        //}
-
-        // #################
-        // ##  jump code  ##
-        // #################
         if ((this.body.onFloor() || this.body.touching.down)) { // disable jumping when landing
             this.jumping = false;
             this.canSlide = true;
             // unslide, make unslide auto crouch when blocked
         }
-
+        
         // crouch code
-        if ((input.down || input.shift) && !this.crouching && (!this.inWater || this.body.onFloor())) {
+        if ((input.down) && !this.crouching && (!this.inWater || this.body.onFloor())) {
             this.crouch();
         }
-        if (!(input.down|| input.shift) && this.crouching) { // uncrouch
+        if (!(input.down || input.shift) && this.crouching) { // uncrouch
             this.uncrouch();
         }
 
-        if (this.sliding) {
-            targetXVelocity = targetXVelocity * 1.2;
-            this.body.setVelocityY(0);
+        // slide code
+        if (input.shift && !this.inWater && this.canSlide && !this.crouching && (this.body.onFloor() || this.body.touching.down)) {
+            this.slide(time);
+            console.log("slide")
         }
 
+        if ((!input.shift && this.sliding) || (time.now > this.slideDuration && this.sliding)) { // unslide when slide button is released or slide timer expires
+            this.sliding = false;
+        }
+
+        // #################
+        // ##  jump code  ##
+        // #################
         if (this.inWater) { // disable jumping and apply movement speed reduction in water
             this.body.setAllowGravity(false);
             this.body.acceleration.y = 0;
@@ -200,6 +197,7 @@ export default class Player extends Phaser.GameObjects.Sprite {
                 this.onIce = false;
                 this.body.setVelocityY(-500);
                 this.bufferJump = false;
+                this.jumping = true;
             }
         } else {
             this.jumping = true;
@@ -233,33 +231,10 @@ export default class Player extends Phaser.GameObjects.Sprite {
     }
     // TODO: fix sliding so it can be performed when falling not just jumping
     slide(time) { // sliding gives a short boost to movement speed and allows player to fit in 1 block gaps. stops ability to change direction. jumping stops sliding. can only slide once in air
-        this.displayHeight = 50;
-        this.body.y = this.body.y - 25;
-        this.slideDuration = time.now + 400;
+        this.crouch();
+        this.slideDuration = time.now + 600;
         this.sliding = true;
         this.canSlide = false;
-        this.body.setAllowGravity(false);
-    }
-
-    unslide() {
-        this.canSlide = false
-        this.body.setAllowGravity(true);
-        let foundTiles = [];
-        let preventUncrouch = false; //prevent crouch if tiles block player
-        foundTiles = this.scene.map.getTilesWithinWorldXY(this.body.x,this.body.y+60,55,40);
-        foundTiles.forEach((tile) => {
-            if (tile.index != -1 && tile.collideUp) { // change to tile collision property which we will add later
-                preventUncrouch = true;
-            }
-        })
-        if (!preventUncrouch) {
-            this.displayHeight = 100;
-            this.body.y = this.body.y + 20;
-            this.sliding = false;
-        } else { // start crouching
-            this.sliding = false;
-            this.crouching = true;
-        }
     }
 
     die() {

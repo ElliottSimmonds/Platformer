@@ -18,14 +18,14 @@ export default class PlayerBody {
             this.armature.armature.flipX = 0;
         }
 
-        if (player.crouching) {
+        if (player.sliding) {
+            this.dash();
+        } else if (player.crouching) {
             if (input.left || input.right) {
                 this.crouchWalk();
             } else {
                 this.crouch()
             }
-        } else if (player.sliding) {
-            this.dash();
         } else if (player.inWater && !player.body.onFloor()) {
             this.swim()
         } else if (!player.body.onFloor()) {
