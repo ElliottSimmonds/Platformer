@@ -19,12 +19,11 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
         //console.log(this.body.touching.down && player.jumping)
 
         if (this.properties.pushable) {
-            if (this.body.touching.left) {
+            if (this.body.touching.left && !this.body.blocked.left) {
                 this.body.setVelocityX(300);
             } else if (this.body.touching.right) {
                 this.body.setVelocityX(-300);
             } else if (this.body.touching.down && player.jumping) {
-                console.log("hey!")
                 this.body.y = this.body.y - 2; // need to do this otherwise a block on a platform will be stuck?
                 this.body.setVelocityY(-400);
             } else if (this.body.touching.up && !this.properties.gravity && !this.body.onFloor()) {
@@ -47,7 +46,7 @@ export default class SpecialTile extends Phaser.GameObjects.Sprite { // change n
                 } else {
                     this.onIce = false;
                 }
-                if (tile.properties['up'] && tile.properties['up'].boost && !this.body.blocked.right) {
+                if (tile.properties['up'] && tile.properties['up'].boost) {
                     this.body.setVelocityX(500);
                 }
             });

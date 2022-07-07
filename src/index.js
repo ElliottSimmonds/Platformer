@@ -154,10 +154,7 @@ class MyGame extends Phaser.Scene {
 
             tile.bumping = false;
         });
-        this.physics.add.collider(this.player, this.groundLayer);
-        this.physics.add.collider(this.player, this.specialTiles, function(player, tile) { tile.bump(player, tile)});
-        this.physics.add.collider(this.specialTiles, this.groundLayer);
-        this.physics.add.collider(this.specialTiles, this.specialTiles);
+
 
         this.specialTiles.getChildren().forEach(tile => {
             if (tile.properties.pushable) {
@@ -172,7 +169,14 @@ class MyGame extends Phaser.Scene {
             }
             tile.body.maxVelocity.x = 500;
             tile.body.maxVelocity.y = 500;
+            //tile.body.setFrictionX(1);
+            //tile.body.setImmovable(true);
         });
+
+        this.physics.add.collider(this.player, this.groundLayer);
+        this.physics.add.collider(this.player, this.specialTiles, function(player, tile) { tile.bump(player, tile)});
+        this.physics.add.collider(this.specialTiles, this.groundLayer);
+        this.physics.add.collider(this.specialTiles, this.specialTiles);
 
         this.keys = {
             jump: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE),
