@@ -404,6 +404,12 @@ const config = {
     width: 800,
     height: 600,
     scene: MyGame,
+    fps: {
+        forceSetTimeOut: true,
+        // panicMax: 0,
+        // smoothStep: false,
+        target: 60
+    },
     physics: {
         default: 'arcade',
         arcade: {
